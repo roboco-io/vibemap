@@ -517,6 +517,31 @@ function App() {
                   })}
                 </div>
               </div>
+              {(references.byNode[activeNode.id]?.length ?? 0) > 0 && (
+                <div className="panel-section refs">
+                  <div className="panel-section-label">{t.referencesTitle}</div>
+                  <ul className="refs-list">
+                    {references.byNode[activeNode.id].map((ref, i) => (
+                      <li key={i} className="refs-item">
+                        <a
+                          className="refs-link"
+                          href={ref.url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        >
+                          {ref.title}
+                        </a>
+                        {ref.excerpt && (
+                          <p className="refs-excerpt">{ref.excerpt}</p>
+                        )}
+                        <span className={`refs-lang refs-lang-${ref.lang || 'other'}`}>
+                          {(ref.lang || 'other').toUpperCase()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </>
         )}
