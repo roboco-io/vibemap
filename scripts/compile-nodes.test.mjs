@@ -4,6 +4,10 @@ import { parseFrontmatter } from './compile-nodes/frontmatter.mjs';
 import { renderSection, splitLanguageSections } from './compile-nodes/markdown.mjs';
 import { validateNode } from './compile-nodes/schema.mjs';
 import { mergeNodes, normalizeEdges, validateEdges } from './compile-nodes/merge.mjs';
+import { compile } from './compile-nodes.mjs';
+import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const KNOWN_CATS = new Set(['core', 'mindset', 'ai', 'tool', 'tech', 'data', 'ops']);
 
@@ -204,4 +208,57 @@ test('edges: validateEdges flags endpoint missing in byId', () => {
   const { valid, broken } = validateEdges([['a', 'b'], ['a', 'ghost']], byId);
   assert.deepEqual(valid, [['a', 'b']]);
   assert.deepEqual(broken, [['a', 'ghost']]);
+});
+
+function setupCompileFixture() {
+  const root = mkdtempSync(join(tmpdir(), 'vibemap-compile-'));
+  mkdirSync(join(root, 'raw', 'nodes'), { recursive: true });
+  mkdirSync(join(root, 'docs'), { recursive: true });
+  mkdirSync(join(root, 'scripts'), { recursive: true });
+  writeFileSync(join(root, 'docs/data.js'),
+    `window.VIBEMAP_DATA = { categories: { ops: { color: "#f87171", label: { ko: "운영", en: "Ops", ja: "運用" } } }, nodes: [], edges: [] };\n`);
+  writeFileSync(join(root, 'scripts/legacy-nodes.js'),
+    `const LEGACY_NODES = [{ id: 'serverless', cat: 'ops', size: 1, title: { ko: 'S', en: 'S', ja: 'S' }, body: { ko: 'x', en: 'x', ja: 'x' } }];\nmodule.exports = LEGACY_NODES;\nglobalThis.LEGACY_NODES = LEGACY_NODES;\n`);
+  writeFileSync(join(root, 'scripts/legacy-edges.js'),
+    `const LEGACY_EDGES = [];\nmodule.exports = LEGACY_EDGES;\nglobalThis.LEGACY_EDGES = LEGACY_EDGES;\n`);
+  writeFileSync(join(root, 'raw/nodes/dsql.md'), `---
+id: dsql
+cat: ops
+size: 3
+title:
+  ko: Aurora DSQL
+  en: Aurora DSQL
+  ja: Aurora DSQL
+refs:
+  - url: https://example.com/dsql
+    title: Docs
+    lang: en
+---
+
+## ko
+Aurora DSQL은 [[serverless]] 스택의 SQL 옵션이다.
+
+## en
+Aurora DSQL is the SQL option in the [[serverless]] stack.
+
+## ja
+Aurora DSQLは[[serverless]]スタックのSQLオプションだ。
+`);
+  return root;
+}
+
+test('compile: end-to-end with single md + legacy fallback', async () => {
+  const root = setupCompileFixture();
+  const result = await compile({ projectRoot: root, strict: false, now: '2026-04-22T00:00:00.000Z' });
+  assert.equal(result.stats.fromMarkdown, 1);
+  assert.equal(result.stats.fromLegacy, 1);
+  assert.ok(result.edges.some(([a, b]) => (a === 'dsql' && b === 'serverless') || (a === 'serverless' && b === 'dsql')));
+});
+
+test('compile: output is deterministic across two runs', async () => {
+  const root = setupCompileFixture();
+  const a = await compile({ projectRoot: root, strict: false, now: '2026-04-22T00:00:00.000Z' });
+  const b = await compile({ projectRoot: root, strict: false, now: '2026-04-22T00:00:00.000Z' });
+  assert.equal(a.dataJsBytes, b.dataJsBytes);
+  assert.equal(a.nodesJsonBytes, b.nodesJsonBytes);
 });
