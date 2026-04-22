@@ -12,6 +12,28 @@ export function normalizeText(input) {
     .trim();
 }
 
+export function detectLang(text) {
+  if (typeof text !== 'string' || !text.trim()) return 'other';
+
+  let hangul = 0, kana = 0, kanji = 0, latin = 0;
+  for (const ch of text) {
+    const cp = ch.codePointAt(0);
+    if (cp >= 0xAC00 && cp <= 0xD7AF) hangul++;          // 한글 음절
+    else if (cp >= 0x3040 && cp <= 0x30FF) kana++;       // 히라가나·가타카나
+    else if (cp >= 0x4E00 && cp <= 0x9FFF) kanji++;      // CJK 한자
+    else if ((cp >= 0x41 && cp <= 0x5A) || (cp >= 0x61 && cp <= 0x7A)) latin++;
+  }
+
+  if (hangul === 0 && kana === 0 && kanji === 0 && latin === 0) return 'other';
+
+  if (hangul >= kana && hangul >= kanji && hangul >= latin && hangul > 0) return 'ko';
+  if (kana > 0 || kanji > 0) {
+    if (kana + kanji >= hangul && kana + kanji >= latin) return 'ja';
+  }
+  if (latin > 0 && latin >= hangul && latin >= kana + kanji) return 'en';
+  return 'other';
+}
+
 export function normalizeUrl(input) {
   if (typeof input !== 'string' || !input) return input ?? '';
   let url;

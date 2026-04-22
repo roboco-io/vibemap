@@ -88,3 +88,30 @@ test('normalizeUrl: returns original on invalid', () => {
   assert.equal(normalizeUrl('not a url'), 'not a url');
   assert.equal(normalizeUrl(''), '');
 });
+
+import { detectLang } from './build-references.mjs';
+
+test('detectLang: Hangul dominated → ko', () => {
+  assert.equal(detectLang('의도공학은 왜 중요한가?'), 'ko');
+});
+
+test('detectLang: Hiragana/Katakana dominated → ja', () => {
+  assert.equal(detectLang('バイブコーディングとは何か'), 'ja');
+});
+
+test('detectLang: Latin dominated → en', () => {
+  assert.equal(detectLang('Ship intent, not code.'), 'en');
+});
+
+test('detectLang: mixed but Korean majority → ko', () => {
+  assert.equal(detectLang('Intent — 의도공학은 가장 중요하다'), 'ko');
+});
+
+test('detectLang: CJK ambiguous (only kanji) → ja', () => {
+  assert.equal(detectLang('意図工学'), 'ja');
+});
+
+test('detectLang: empty or unknown → other', () => {
+  assert.equal(detectLang(''), 'other');
+  assert.equal(detectLang('12345 !!!'), 'other');
+});
