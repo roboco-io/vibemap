@@ -59,6 +59,7 @@ const LEGACY_EDGES = [
   ["db-basics","api"], ["container","cicd"],
   ["cc-hooks","lint"], ["cc-commands","agentic"],
   ["mcp","db-basics"], ["requirements","tdd"],
+  ["serverless","microservices"],
 ];
 
 if (typeof module !== 'undefined') module.exports = LEGACY_EDGES;
