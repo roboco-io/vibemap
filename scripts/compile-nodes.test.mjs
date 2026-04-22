@@ -2,6 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseFrontmatter } from './compile-nodes/frontmatter.mjs';
 import { renderSection, splitLanguageSections } from './compile-nodes/markdown.mjs';
+import { validateNode } from './compile-nodes/schema.mjs';
+
+const KNOWN_CATS = new Set(['core', 'mindset', 'ai', 'tool', 'tech', 'data', 'ops']);
 
 test('frontmatter: parses basic key/value + nested title', () => {
   const src = `---
@@ -114,4 +117,61 @@ English body.
 
 test('markdown: splitLanguageSections requires all three', () => {
   assert.throws(() => splitLanguageSections('## ko\nonly korean'), /missing/i);
+});
+
+test('schema: accepts a complete valid node', () => {
+  const node = {
+    id: 'dsql', cat: 'ops', size: 3,
+    title: { ko: 'Aurora DSQL', en: 'Aurora DSQL', ja: 'Aurora DSQL' },
+    refs: [{ url: 'https://docs.aws.amazon.com/aurora-dsql/', title: 'Docs', lang: 'en' }],
+  };
+  assert.doesNotThrow(() => validateNode(node, { knownCats: KNOWN_CATS, file: 'x.md' }));
+});
+
+test('schema: missing id throws with file path', () => {
+  assert.throws(
+    () => validateNode({ cat: 'ops' }, { knownCats: KNOWN_CATS, file: 'missing-id.md' }),
+    (err) => /missing-id\.md/.test(err.message) && /id/.test(err.message)
+  );
+});
+
+test('schema: unknown cat throws', () => {
+  assert.throws(() => validateNode(
+    { id: 'x', cat: 'bogus', size: 3, title: { ko: 'x', en: 'x', ja: 'x' } },
+    { knownCats: KNOWN_CATS, file: 'x.md' }
+  ), /unknown cat/i);
+});
+
+test('schema: size must be 1/2/3', () => {
+  assert.throws(() => validateNode(
+    { id: 'x', cat: 'ops', size: 9, title: { ko: 'x', en: 'x', ja: 'x' } },
+    { knownCats: KNOWN_CATS, file: 'x.md' }
+  ), /size/);
+});
+
+test('schema: title must have ko/en/ja non-empty', () => {
+  assert.throws(() => validateNode(
+    { id: 'x', cat: 'ops', size: 3, title: { ko: 'x', en: '', ja: 'x' } },
+    { knownCats: KNOWN_CATS, file: 'x.md' }
+  ), /title\.en/);
+});
+
+test('schema: refs url must be http(s)', () => {
+  assert.throws(() => validateNode(
+    {
+      id: 'x', cat: 'ops', size: 3, title: { ko: 'x', en: 'x', ja: 'x' },
+      refs: [{ url: 'javascript:alert(1)', title: 'bad', lang: 'en' }],
+    },
+    { knownCats: KNOWN_CATS, file: 'x.md' }
+  ), /http/);
+});
+
+test('schema: refs lang must be in allowed set', () => {
+  assert.throws(() => validateNode(
+    {
+      id: 'x', cat: 'ops', size: 3, title: { ko: 'x', en: 'x', ja: 'x' },
+      refs: [{ url: 'https://example.com', title: 'x', lang: 'fr' }],
+    },
+    { knownCats: KNOWN_CATS, file: 'x.md' }
+  ), /lang/);
 });
