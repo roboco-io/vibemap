@@ -159,3 +159,59 @@ test('matchNodes: word-boundary — "git" does not match "github" by default', (
   const gitHit = hits.find(h => h.nodeId === 'git');
   assert.equal(gitHit, undefined);
 });
+
+import { extractSources } from './build-references.mjs';
+
+test('extractSources: reads top-level sources array', () => {
+  const graph = {
+    sources: [
+      { url: 'https://a.example.com/', title: 'A', excerpt: 'about intent' },
+      { url: 'https://b.example.com/', title: 'B', summary: 'about vibe' },
+    ],
+  };
+  const srcs = extractSources(graph);
+  assert.equal(srcs.length, 2);
+  assert.equal(srcs[0].url, 'https://a.example.com/');
+  assert.equal(srcs[0].title, 'A');
+  assert.equal(srcs[0].text, 'A about intent');
+});
+
+test('extractSources: falls back to nodes with url metadata', () => {
+  const graph = {
+    nodes: [
+      { id: 'n1', label: 'Intent Eng', source: { url: 'https://x.example/' }, description: 'ship intent' },
+      { id: 'n2', label: 'NoUrl' },
+    ],
+  };
+  const srcs = extractSources(graph);
+  assert.equal(srcs.length, 1);
+  assert.equal(srcs[0].url, 'https://x.example/');
+  assert.equal(srcs[0].title, 'Intent Eng');
+});
+
+test('extractSources: uses name/summary when title/excerpt absent', () => {
+  const graph = {
+    sources: [
+      { url: 'https://c.example/', name: 'C', summary: 'sum' },
+    ],
+  };
+  const srcs = extractSources(graph);
+  assert.equal(srcs[0].title, 'C');
+  assert.equal(srcs[0].text, 'C sum');
+});
+
+test('extractSources: dedupes by normalized URL (last wins for metadata)', () => {
+  const graph = {
+    sources: [
+      { url: 'https://a.example/', title: 'First' },
+      { url: 'https://a.example', title: 'Second' },
+    ],
+  };
+  const srcs = extractSources(graph);
+  assert.equal(srcs.length, 1);
+});
+
+test('extractSources: returns empty on missing graph', () => {
+  assert.deepEqual(extractSources({}), []);
+  assert.deepEqual(extractSources(null), []);
+});

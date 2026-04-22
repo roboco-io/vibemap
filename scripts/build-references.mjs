@@ -39,6 +39,46 @@ function countMatches(normalizedText, keyword) {
   return { count, totalLen: count * kw.length };
 }
 
+function pick(obj, keys) {
+  for (const k of keys) {
+    if (obj && typeof obj[k] === 'string' && obj[k].trim()) return obj[k];
+  }
+  return '';
+}
+
+function sourceFromRecord(rec) {
+  if (!rec || typeof rec !== 'object') return null;
+  const rawUrl = rec.url || rec.source?.url || '';
+  if (!rawUrl) return null;
+  const title = pick(rec, ['title', 'label', 'name']);
+  const excerpt = pick(rec, ['excerpt', 'summary', 'description']);
+  const text = [title, excerpt].filter(Boolean).join(' ');
+  return {
+    url: rawUrl,
+    normalizedUrl: normalizeUrl(rawUrl),
+    title: title || rawUrl,
+    excerpt: excerpt.slice(0, 200),
+    text,
+  };
+}
+
+export function extractSources(graph) {
+  if (!graph || typeof graph !== 'object') return [];
+  const byUrl = new Map();
+
+  const candidates = [];
+  if (Array.isArray(graph.sources)) candidates.push(...graph.sources);
+  if (Array.isArray(graph.documents)) candidates.push(...graph.documents);
+  if (Array.isArray(graph.nodes)) candidates.push(...graph.nodes);
+
+  for (const rec of candidates) {
+    const src = sourceFromRecord(rec);
+    if (!src) continue;
+    byUrl.set(src.normalizedUrl, src);
+  }
+  return Array.from(byUrl.values());
+}
+
 export function matchNodes(rawText, keywordIndex, opts = {}) {
   const { maxPerSource = 3, minScore = 0.3 } = opts;
   const text = normalizeText(rawText);
