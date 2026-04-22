@@ -1,4 +1,4 @@
-.PHONY: help test build ingest serve serve-bg stop open e2e clean
+.PHONY: help test build compile ingest serve serve-bg stop open e2e clean
 
 PORT ?= 8080
 URL  := http://localhost:$(PORT)/
@@ -8,8 +8,9 @@ OPEN := $(shell command -v open 2>/dev/null || command -v xdg-open 2>/dev/null)
 help:
 	@echo "타겟 목록:"
 	@echo "  make test       Node 내장 테스트 러너로 scripts/*.test.mjs 실행"
-	@echo "  make build      docs/references.json 을 graph.json 에서 재생성"
-	@echo "  make ingest     graphify update + build-references 를 연쇄 실행"
+	@echo "  make compile    raw/nodes/ + legacy-*.js → docs/data.js + docs/nodes.json"
+	@echo "  make build      compile + docs/references.json 재생성"
+	@echo "  make ingest     compile + graphify update + build-references 연쇄 실행"
 	@echo "  make serve      docs/ 를 루트로 http.server 를 포그라운드 실행 (Ctrl+C 로 종료)"
 	@echo "  make serve-bg   위와 같지만 백그라운드에서 — PID 는 $(PIDFILE) 에 기록"
 	@echo "  make stop       백그라운드 서버 종료"
@@ -20,10 +21,13 @@ help:
 test:
 	npm test
 
-build:
+compile:
+	node scripts/compile-nodes.mjs
+
+build: compile
 	node scripts/build-references.mjs
 
-ingest:
+ingest: compile
 	bash scripts/ingest.sh
 
 serve:
@@ -73,15 +77,22 @@ e2e: test serve-bg
 			MAPPED=$$(curl -s $(URL)references.json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{const j=JSON.parse(d);console.log(j.stats.mappedNodes+"/"+j.stats.totalSources)})'); \
 			echo "references.json: $$MAPPED nodes mapped"; \
 		fi; \
+		NODES_STATUS=$$(curl -s -o /dev/null -w "%{http_code}" $(URL)nodes.json); \
+		if [ "$$NODES_STATUS" != "200" ]; then \
+			echo "WARN: nodes.json 응답 $$NODES_STATUS (사이트는 fallback 으로 정상 작동)"; \
+		else \
+			NODE_COUNT=$$(curl -s $(URL)nodes.json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{const j=JSON.parse(d);console.log(Object.keys(j.nodes).length)})'); \
+			echo "nodes.json: $$NODE_COUNT node bodies"; \
+		fi; \
 	fi
 	@$(MAKE) open
 	@echo ""
 	@echo "브라우저에서 다음을 확인:"
 	@echo "  1. 그래프가 중심→가지로 리플 애니메이션을 보여주는가"
-	@echo "  2. 상단 검색창에 'intent' 입력 → 해당 노드 클릭 → 우측 패널의 '근거 자료' 섹션에 Intent Engineering 링크가 뜨는가"
-	@echo "  3. 'vibe' 노드 클릭 → The Art of Vibe Coding 링크가 뜨는가"
-	@echo "  4. 'git' 등 근거 자료가 없는 노드 클릭 시 '근거 자료' 섹션이 미표시인가"
-	@echo "  5. 언어 전환(KO/EN/JA) 시 섹션 제목이 바뀌는가"
+	@echo "  2. 'dsql' 검색 → 클릭 → 본문이 풍부한 HTML로 렌더되는가 (wiki-link 포함)"
+	@echo "  3. 본문의 [[serverless]] 링크 클릭 → serverless 노드로 포커스 이동하는가"
+	@echo "  4. 'git' 등 legacy 노드 클릭 시 짧은 본문이 여전히 잘 뜨는가"
+	@echo "  5. 언어 전환(KO/EN/JA) 시 본문·섹션 제목이 바뀌는가"
 	@echo ""
 	@echo "확인 후 'make stop' 으로 서버 종료."
 

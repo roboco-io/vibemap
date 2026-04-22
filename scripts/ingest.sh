@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# scripts/ingest.sh — raw/ 를 graphify로 재인덱스하고 docs/references.json 을 새로 생성
+# scripts/ingest.sh — recompile nodes, re-index corpus, regenerate references.json
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "▶ graphify update raw/"
-graphify update raw/ || echo "⚠ graphify update skipped or failed (empty corpus is OK); continuing."
+echo "▶ compile raw/nodes/ → docs/data.js + docs/nodes.json"
+node scripts/compile-nodes.mjs
+
+echo "▶ graphify update raw/urls/"
+graphify update raw/urls/ || echo "⚠ graphify update skipped or failed (empty corpus is OK); continuing."
 
 echo "▶ build docs/references.json"
 node scripts/build-references.mjs "$@"
