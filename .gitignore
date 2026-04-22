@@ -1,0 +1,10 @@
+# Makefile 백그라운드 서버 산출물
+.make.serve.pid
+.make.serve.log
+
+# macOS
+.DS_Store
+
+# 편집기/IDE 로컬 설정
+.vscode/
+.idea/

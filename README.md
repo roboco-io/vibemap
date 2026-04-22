@@ -31,14 +31,16 @@
 정적 자원만 사용하지만 `file://` 로 열면 JSX/CDN CORS가 막히므로 HTTP 서버를 띄워야 합니다. 웹 자원은 `docs/` 폴더에 있으므로 해당 폴더를 루트로 서빙합니다.
 
 ```bash
-python3 -m http.server 8080 -d docs
-# → http://localhost:8080/
+make serve          # 포그라운드 (Ctrl+C 종료)
+make e2e            # 백그라운드 + 브라우저 자동 오픈 + 체크리스트
+make stop           # 백그라운드 서버 종료
 ```
 
-또는:
+`make help` 로 전체 타겟 확인. Make 없이 직접 돌리려면:
 
 ```bash
-npx serve docs
+python3 -m http.server 8080 -d docs
+# → http://localhost:8080/
 ```
 
 ## 기술 스택
