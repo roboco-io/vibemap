@@ -28,17 +28,17 @@
 
 ## 로컬 실행
 
-정적 자원만 사용하지만 `file://` 로 열면 JSX/CDN CORS가 막히므로 임의의 HTTP 서버를 띄워야 합니다.
+정적 자원만 사용하지만 `file://` 로 열면 JSX/CDN CORS가 막히므로 HTTP 서버를 띄워야 합니다. 웹 자원은 `docs/` 폴더에 있으므로 해당 폴더를 루트로 서빙합니다.
 
 ```bash
-python3 -m http.server 8080
+python3 -m http.server 8080 -d docs
 # → http://localhost:8080/
 ```
 
 또는:
 
 ```bash
-npx serve .
+npx serve docs
 ```
 
 ## 기술 스택
@@ -47,21 +47,27 @@ npx serve .
 - **바닐라 CSS** — Obsidian 재해석 다크 보라 테마
 - **자체 force simulation** (`sim.js`) — O(n²) 반발력 + 스프링 + 센터링
 - **CDN 호스팅 폰트** — Inter, Noto Sans KR, Noto Sans JP
-- **GitHub Pages** — `main` 브랜치 루트 서빙
+- **GitHub Pages** — `main` 브랜치 `/docs` 폴더 서빙
 
 ## 파일 구조
 
 ```
 vibemap/
-├── VibeMap.html     # 엔트리 HTML (index.html과 동일)
-├── index.html       # GitHub Pages 루트용
-├── styles.css       # 전체 스타일
-├── data.js          # 노드 / 엣지 / 카테고리 데이터
-├── i18n.js          # KO/EN/JA 번역
-├── sim.js           # force-directed 시뮬레이터
-├── app.jsx          # React 앱 본체
-└── CNAME            # vibemap.roboco.io
+├── docs/                   # GitHub Pages 서빙 루트 (웹 자원)
+│   ├── index.html          # 엔트리 HTML
+│   ├── app.jsx             # React 앱 본체
+│   ├── data.js             # 노드 / 엣지 / 카테고리 데이터
+│   ├── i18n.js             # KO/EN/JA 번역
+│   ├── sim.js              # force-directed 시뮬레이터
+│   ├── styles.css          # 전체 스타일
+│   └── CNAME               # vibemap.roboco.io
+├── specs/superpowers/      # 스펙 · 구현 플랜 문서
+│   ├── specs/
+│   └── plans/
+└── README.md
 ```
+
+> **GitHub Pages 설정 안내:** 저장소 Settings > Pages > Source에서 **Branch: `main`, Folder: `/docs`** 로 설정해야 합니다. 설정 변경 직후 첫 배포에서 최대 수 분의 지연이 있을 수 있습니다.
 
 ## 참고
 

@@ -42,25 +42,31 @@ raw/                         graphify-out/           references.json          Vi
 
 ### 3.2 디렉토리 구조 (신규/수정)
 
+GitHub Pages 서빙 루트는 저장소의 `docs/` 폴더이므로, 브라우저가 fetch해야 하는 `references.json`은 `docs/`에 두고, 파이프라인 아티팩트(`raw/`, `graphify-out/`)는 웹에 노출되지 않도록 저장소 루트에 둔다.
+
 ```
 vibemap/
-├── raw/                            # 신규 — 원본 corpus
+├── raw/                            # 신규 — 원본 corpus (웹 비노출)
 │   ├── urls/                       # graphify add 가 저장한 HTML/텍스트
 │   ├── notes/                      # 수기 마크다운 노트
 │   ├── internal/                   # 내부 저장소에서 복사한 문서 (심볼릭 링크 X)
 │   └── .gitignore                  # 대용량 바이너리·캐시 제외
-├── graphify-out/                   # 신규 — graphify 출력
+├── graphify-out/                   # 신규 — graphify 출력 (웹 비노출)
 │   └── graph.json
-├── scripts/
-│   ├── ingest.sh                   # 신규 — graphify update + build-references 연쇄 실행
-│   └── build-references.mjs        # 신규 — graph.json → references.json 변환기
-├── references.json                 # 신규 — 최종 산출물 (git에 커밋됨)
-├── data.js                         # 기존 — 수정하지 않음
-├── app.jsx                         # 수정 — references.json 로드 + 패널 섹션
-├── styles.css                      # 수정 — .refs 스타일
-├── i18n.js                         # 수정 — "근거 자료" 라벨 ko/en/ja
-└── docs/
-    └── superpowers/specs/2026-04-22-graphify-knowledge-base-design.md  (본 문서)
+├── scripts/                        # 신규 — 빌드 스크립트 (웹 비노출)
+│   ├── ingest.sh                   # graphify update + build-references 연쇄 실행
+│   └── build-references.mjs        # graph.json → docs/references.json 변환기
+├── docs/                           # GitHub Pages 서빙 루트
+│   ├── references.json             # 신규 — 최종 산출물 (git에 커밋됨)
+│   ├── data.js                     # 기존 — 수정하지 않음
+│   ├── app.jsx                     # 수정 — references.json 로드 + 패널 섹션
+│   ├── styles.css                  # 수정 — .refs 스타일
+│   ├── i18n.js                     # 수정 — "근거 자료" 라벨 ko/en/ja
+│   ├── index.html                  # 기존
+│   ├── sim.js                      # 기존
+│   └── CNAME                       # 기존
+└── specs/superpowers/
+    └── specs/2026-04-22-graphify-knowledge-base-design.md  (본 문서)
 ```
 
 `raw/internal/`은 **복사본**으로 관리한다. 심볼릭 링크는 graphify의 파일 스캔이 외부 저장소의 무관한 파일까지 탐색할 위험이 있다.
@@ -200,14 +206,14 @@ graphify add https://example.com/article --dir raw/urls
 # 2. 재인덱스
 graphify update raw/
 
-# 3. references.json 생성
+# 3. docs/references.json 생성
 node scripts/build-references.mjs
 
 # 4. 결과 검토 (특히 _unmapped)
-git diff references.json
+git diff docs/references.json
 
 # 5. 커밋
-git add raw/ graphify-out/graph.json references.json
+git add raw/ graphify-out/graph.json docs/references.json
 git commit -m "knowledge: add article X"
 git push    # GitHub Pages 배포
 ```
