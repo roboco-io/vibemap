@@ -23,6 +23,7 @@ function App() {
   const [introGone, setIntroGone] = useState(false);
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const [entryProgress, setEntryProgress] = useState(0); // 0→1 ripple reveal
+  const [references, setReferences] = useState({ byNode: {} });
 
   const t = I18N[lang];
   const stageRef = useRef(null);
@@ -110,6 +111,28 @@ function App() {
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // Load references.json (생성 실패 시 조용히 비어있는 상태 유지)
+  useEffect(() => {
+    let cancelled = false;
+    fetch('./references.json', { cache: 'no-cache' })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        if (data && data.version === '1' && data.byNode) {
+          setReferences(data);
+        } else {
+          console.warn('references.json: unsupported schema; using empty fallback');
+        }
+      })
+      .catch((err) => {
+        console.warn('references.json unavailable:', err.message);
+      });
+    return () => { cancelled = true; };
   }, []);
 
   // Persist lang
