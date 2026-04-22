@@ -48,7 +48,7 @@ function pick(obj, keys) {
 
 function sourceFromRecord(rec) {
   if (!rec || typeof rec !== 'object') return null;
-  const rawUrl = rec.url || rec.source?.url || '';
+  const rawUrl = rec.url || rec.source?.url || rec.source_url || '';
   if (!rawUrl) return null;
   const title = pick(rec, ['title', 'label', 'name']);
   const excerpt = pick(rec, ['excerpt', 'summary', 'description']);
@@ -60,6 +60,24 @@ function sourceFromRecord(rec) {
     excerpt: excerpt.slice(0, 200),
     text,
   };
+}
+
+// graphify 그래프는 한 URL에 수십 개 노드가 연결된다. URL 단위로 aggregate 해야
+// "이 자료는 어떤 개념들을 담는가"가 풍부한 텍스트로 표현되어 48노드 매칭률이 오른다.
+function mergeSourceIntoMap(byUrl, src) {
+  const existing = byUrl.get(src.normalizedUrl);
+  if (!existing) {
+    byUrl.set(src.normalizedUrl, { ...src });
+    return;
+  }
+  // 같은 URL을 가진 추가 레코드: 첫 번째 레코드를 대표로 삼고(graphify 루트 노드가
+  // 가장 먼저 나오므로 파일의 주 제목이 유지됨), text 는 누적해 매칭 풍부도를 올린다.
+  if (src.text) {
+    existing.text = existing.text ? `${existing.text} · ${src.text}` : src.text;
+  }
+  if (src.excerpt && !existing.excerpt) {
+    existing.excerpt = src.excerpt;
+  }
 }
 
 export function extractSources(graph) {
@@ -74,7 +92,7 @@ export function extractSources(graph) {
   for (const rec of candidates) {
     const src = sourceFromRecord(rec);
     if (!src) continue;
-    byUrl.set(src.normalizedUrl, src);
+    mergeSourceIntoMap(byUrl, src);
   }
   return Array.from(byUrl.values());
 }

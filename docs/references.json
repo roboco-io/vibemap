@@ -1,12 +1,49 @@
 {
   "version": "1",
-  "generatedAt": "2026-04-22T03:22:28.618Z",
+  "generatedAt": "2026-04-22T03:47:31.430Z",
   "source": "graphify-out/graph.json",
   "stats": {
-    "totalSources": 0,
-    "mappedNodes": 0,
+    "totalSources": 2,
+    "mappedNodes": 4,
     "unmappedCount": 0
   },
-  "byNode": {},
+  "byNode": {
+    "intent": [
+      {
+        "url": "https://intent.roboco.io",
+        "title": "Intent Engineering (roboco.io)",
+        "excerpt": "",
+        "lang": "en",
+        "score": 9.288
+      }
+    ],
+    "vibe": [
+      {
+        "url": "https://roboco.io/posts/the-art-of-vibe-coding",
+        "title": "The Art of Vibe Coding (roboco.io)",
+        "excerpt": "",
+        "lang": "en",
+        "score": 4.173
+      }
+    ],
+    "convergence": [
+      {
+        "url": "https://roboco.io/posts/the-art-of-vibe-coding",
+        "title": "The Art of Vibe Coding (roboco.io)",
+        "excerpt": "",
+        "lang": "en",
+        "score": 1.064
+      }
+    ],
+    "small-steps": [
+      {
+        "url": "https://roboco.io/posts/the-art-of-vibe-coding",
+        "title": "The Art of Vibe Coding (roboco.io)",
+        "excerpt": "",
+        "lang": "en",
+        "score": 1.064
+      }
+    ]
+  },
   "_unmapped": []
 }
