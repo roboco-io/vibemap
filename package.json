@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test scripts/",
+    "test": "node --test scripts/*.test.mjs",
     "build:refs": "node scripts/build-references.mjs",
     "build:refs:strict": "node scripts/build-references.mjs --strict",
     "ingest": "bash scripts/ingest.sh"
