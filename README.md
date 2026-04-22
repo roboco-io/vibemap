@@ -69,6 +69,41 @@ vibemap/
 
 > **GitHub Pages 설정 안내:** 저장소 Settings > Pages > Source에서 **Branch: `main`, Folder: `/docs`** 로 설정해야 합니다. 설정 변경 직후 첫 배포에서 최대 수 분의 지연이 있을 수 있습니다.
 
+## 지식기반 관리 (graphify)
+
+VibeMap의 각 노드에는 외부 자료(블로그·문서·노트)를 자동으로 연결할 수 있습니다. 원본은 `raw/`에 모이고, [graphify](https://github.com/safishamsi/graphify)가 그래프(`graphify-out/graph.json`)로 만든 뒤 `scripts/build-references.mjs`가 48노드별 근거 자료(`docs/references.json`)를 생성합니다. 핵심 교육 노드는 `docs/data.js`에 그대로 유지되고, 근거 자료는 슬라이드 패널에 별도 섹션으로 노출됩니다.
+
+### 새 자료 추가
+
+```bash
+# 1) 원본 수집 — graphify가 URL을 fetch해 raw/urls/ 에 markdown으로 저장
+graphify add https://example.com/article --dir raw/urls --author "Name"
+
+# 2) LLM 기반 그래프 재생성 — Claude Code 세션에서 입력
+/graphify ./raw --update
+
+# 3) docs/references.json 재생성
+bash scripts/ingest.sh
+
+# 4) 결과 검토 (_unmapped 배열이 비어있는지, 매핑이 합리적인지)
+git diff docs/references.json
+
+# 5) 커밋 & 배포
+git add raw/ graphify-out/ docs/references.json
+git commit -m "knowledge: add article X"
+git push    # GitHub Pages 자동 배포
+```
+
+`docs/references.json`이 없거나 손상되면 사이트는 조용히 fallback 동작하므로, 빌드 실패가 사용자 경험을 망치지 않습니다.
+
+### 파이프라인 테스트
+
+```bash
+npm test
+```
+
+Node ≥ 18 이 필요하며, 별도 npm 의존성은 없습니다.
+
 ## 참고
 
 - 의도공학 노드는 <https://intent.roboco.io/> 의 Intent Engineering 프레임워크(Why/What/Not/Learnings, "Ship intent, not code", "Never write How")를 반영했습니다.
