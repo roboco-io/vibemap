@@ -227,3 +227,62 @@ export function buildReferences(nodes, graph, opts = {}) {
     _unmapped: unmapped,
   };
 }
+
+// ── CLI ─────────────────────────────────────────────
+import { readFile, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import vm from 'node:vm';
+
+async function loadVibemapData(projectRoot) {
+  const dataPath = join(projectRoot, 'docs', 'data.js');
+  const src = await readFile(dataPath, 'utf8');
+  const context = vm.createContext({ window: {} });
+  vm.runInContext(src, context, { filename: dataPath });
+  if (!context.window.VIBEMAP_DATA) {
+    throw new Error(`data.js did not set window.VIBEMAP_DATA (path: ${dataPath})`);
+  }
+  return context.window.VIBEMAP_DATA;
+}
+
+async function loadGraph(projectRoot) {
+  const graphPath = join(projectRoot, 'graphify-out', 'graph.json');
+  try {
+    const raw = await readFile(graphPath, 'utf8');
+    return { path: graphPath, data: JSON.parse(raw) };
+  } catch (err) {
+    if (err.code === 'ENOENT') return { path: graphPath, data: {} };
+    throw err;
+  }
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const strict = args.includes('--strict');
+
+  const here = dirname(fileURLToPath(import.meta.url));
+  const projectRoot = join(here, '..');
+
+  const data = await loadVibemapData(projectRoot);
+  const { data: graph } = await loadGraph(projectRoot);
+
+  const output = buildReferences(data.nodes, graph);
+
+  const outPath = join(projectRoot, 'docs', 'references.json');
+  await writeFile(outPath, JSON.stringify(output, null, 2) + '\n', 'utf8');
+
+  const { totalSources, mappedNodes, unmappedCount } = output.stats;
+  console.log(`docs/references.json written: ${totalSources} source(s), ${mappedNodes} mapped node(s), ${unmappedCount} unmapped.`);
+
+  if (strict && unmappedCount > 0) {
+    console.error(`FAIL (--strict): ${unmappedCount} unmapped source(s).`);
+    process.exit(2);
+  }
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
