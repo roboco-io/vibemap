@@ -1,6 +1,7 @@
 // VibeMap's intentionally-restricted markdown → HTML renderer.
-// Allowed: paragraphs, **bold**, *italic*, ### h3, unordered lists, [[wiki]] / [[wiki|label]].
-// Rejected (throws): code blocks, tables, images, raw HTML, h1, h2, h4+, ordered lists, blockquotes, inline code.
+// Allowed: paragraphs, **bold**, *italic*, `inline code`, ### h3, unordered lists,
+//          [[wiki]] / [[wiki|label]].
+// Rejected (throws): code blocks, tables, images, raw HTML, h1, h2, h4+, ordered lists, blockquotes.
 // Escapes <, >, & in text nodes. Only anchors emitted have `class="wiki-link" data-node-id="..."`.
 
 const WIKI_RE = /\[\[([a-z0-9][a-z0-9-]*)(?:\|([^\]]+))?\]\]/g;
@@ -37,7 +38,6 @@ export function renderSection(source) {
   if (/^#{4,}\s/m.test(source)) throw new Error('markdown: only ### headers allowed inside language sections');
   if (/^\s*>\s/m.test(source)) throw new Error('markdown: blockquotes are not allowed');
   if (/^\s*\d+\.\s/m.test(source)) throw new Error('markdown: ordered lists are not allowed');
-  if (/`[^`]+`/.test(source)) throw new Error('markdown: inline code is not allowed');
 
   const wikiLinks = new Set();
   const blocks = source.split(/\n\s*\n/);
@@ -65,15 +65,24 @@ function renderBlock(block, wikiLinks) {
 
 function inline(text, wikiLinks) {
   const placeholders = [];
+  // 1. Extract wiki-links first so we never re-process their labels.
   let stripped = text.replace(WIKI_RE, (_m, id, label) => {
     wikiLinks.add(id);
     const display = (label || id).trim();
     placeholders.push(`<a class="wiki-link" data-node-id="${id}">${escapeHtml(display)}</a>`);
     return `\x00${placeholders.length - 1}\x00`;
   });
+  // 2. Extract `inline code` so its contents are not interpreted as markdown.
+  stripped = stripped.replace(/`([^`\n]+)`/g, (_m, code) => {
+    placeholders.push(`<code>${escapeHtml(code)}</code>`);
+    return `\x00${placeholders.length - 1}\x00`;
+  });
+  // 3. Escape everything else.
   stripped = escapeHtml(stripped);
+  // 4. Bold/italic on escaped text.
   stripped = stripped.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
   stripped = stripped.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  // 5. Restore placeholders.
   stripped = stripped.replace(/\x00(\d+)\x00/g, (_m, n) => placeholders[Number(n)]);
   return stripped;
 }

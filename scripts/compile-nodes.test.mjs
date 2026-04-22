@@ -99,8 +99,12 @@ test('markdown: rejects tables, images and raw html', () => {
   assert.throws(() => renderSection('<div>raw</div>'), /raw html/i);
 });
 
-test('markdown: rejects inline code, ordered lists, h1/h2', () => {
-  assert.throws(() => renderSection('some `inline code`'), /inline code/i);
+test('markdown: renders inline `code` as <code>', () => {
+  const { html } = renderSection('Query: `SELECT * FROM t` returns data.');
+  assert.match(html, /<code>SELECT \* FROM t<\/code>/);
+});
+
+test('markdown: rejects ordered lists and h1/h2', () => {
   assert.throws(() => renderSection('1. first\n2. second'), /ordered/i);
   assert.throws(() => renderSection('## not allowed'), /header/i);
 });
