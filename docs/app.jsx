@@ -24,6 +24,7 @@ function App() {
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const [entryProgress, setEntryProgress] = useState(0); // 0→1 ripple reveal
   const [references, setReferences] = useState({ byNode: {} });
+  const [nodesDetail, setNodesDetail] = useState({ nodes: {} });
 
   const t = I18N[lang];
   const stageRef = useRef(null);
@@ -135,6 +136,28 @@ function App() {
     return () => { cancelled = true; };
   }, []);
 
+  // Load nodes.json (노드 본문 + 큐레이션된 refs)
+  useEffect(() => {
+    let cancelled = false;
+    fetch('./nodes.json', { cache: 'no-cache' })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        if (data && data.version === '1' && data.nodes) {
+          setNodesDetail(data);
+        } else {
+          console.warn('nodes.json: unsupported schema; using empty fallback');
+        }
+      })
+      .catch((err) => {
+        console.warn('nodes.json unavailable:', err.message);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   // Persist lang
   useEffect(() => { localStorage.setItem('vibemap.lang', lang); }, [lang]);
 
@@ -172,13 +195,17 @@ function App() {
     return Math.min(1, Math.max(0, local));
   }, [entryProgress, revealOrder, maxDepth]);
 
-  // Filter logic
+  // Filter logic — matches title and (when loaded) node body text
   const queryLower = query.trim().toLowerCase();
   const matchesQuery = useCallback((n) => {
     if (!queryLower) return true;
     const t = getText(n.title, lang).toLowerCase();
-    return t.includes(queryLower);
-  }, [queryLower, lang]);
+    if (t.includes(queryLower)) return true;
+    const bodyHtml = nodesDetail.nodes[n.id]?.body?.[lang] || '';
+    if (!bodyHtml) return false;
+    const bodyText = bodyHtml.replace(/<[^>]+>/g, ' ').toLowerCase();
+    return bodyText.includes(queryLower);
+  }, [queryLower, lang, nodesDetail]);
 
   const isVisible = useCallback((n) => {
     return enabledCats.has(n.cat) && matchesQuery(n);
@@ -495,7 +522,42 @@ function App() {
               <h2 className="panel-title">{getText(activeNode.title, lang)}</h2>
             </div>
             <div className="panel-body">
-              <div className="panel-text">{getText(activeNode.body, lang)}</div>
+              <div
+                className="panel-text"
+                onClick={(e) => {
+                  const a = e.target.closest && e.target.closest('a.wiki-link');
+                  if (!a) return;
+                  e.preventDefault();
+                  const id = a.getAttribute('data-node-id');
+                  if (id && nodes.find(n => n.id === id)) setActiveId(id);
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: nodesDetail.nodes[activeNode.id]?.body?.[lang]
+                    || '<p class="panel-text-empty">본문을 불러오는 중…</p>',
+                }}
+              />
+              {((nodesDetail.nodes[activeNode.id]?.refs?.length) ?? 0) > 0 && (
+                <div className="panel-section refs-curated">
+                  <div className="panel-section-label">{t.refsCurated}</div>
+                  <ul className="refs-list">
+                    {nodesDetail.nodes[activeNode.id].refs.map((ref, i) => (
+                      <li key={i} className="refs-item">
+                        <a
+                          className="refs-link"
+                          href={ref.url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        >
+                          {ref.title}
+                        </a>
+                        <span className={`refs-lang refs-lang-${ref.lang || 'other'}`}>
+                          {(ref.lang || 'other').toUpperCase()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <div className="panel-section">
                 <div className="panel-section-label">{t.connections}</div>
                 <div className="panel-links">
@@ -518,8 +580,8 @@ function App() {
                 </div>
               </div>
               {(references.byNode[activeNode.id]?.length ?? 0) > 0 && (
-                <div className="panel-section refs">
-                  <div className="panel-section-label">{t.referencesTitle}</div>
+                <div className="panel-section more-reading">
+                  <div className="panel-section-label">{t.moreReading}</div>
                   <ul className="refs-list">
                     {references.byNode[activeNode.id].map((ref, i) => (
                       <li key={i} className="refs-item">

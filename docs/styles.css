@@ -505,3 +505,71 @@ html, body {
 .refs-lang-en { background: rgba(96, 165, 250, 0.15); }
 .refs-lang-ja { background: rgba(52, 211, 153, 0.15); }
 .refs-lang-other { background: rgba(232, 228, 255, 0.08); }
+
+/* --- Panel body HTML (rendered from nodes.json) ---------------------- */
+
+.panel .panel-text h3 {
+  margin: 1.3em 0 .5em;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(232, 228, 255, 0.75);
+  letter-spacing: 0.02em;
+}
+
+.panel .panel-text p {
+  margin: 0.8em 0;
+}
+
+.panel .panel-text ul {
+  margin: 0.6em 0 0.9em;
+  padding-left: 1.25em;
+}
+
+.panel .panel-text li {
+  margin: 0.25em 0;
+}
+
+.panel .panel-text strong {
+  color: #e8e4ff;
+}
+
+.panel .panel-text em {
+  color: rgba(232, 228, 255, 0.82);
+}
+
+.panel .panel-text code {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(167, 139, 250, 0.12);
+  color: #d8d1ff;
+}
+
+.panel .panel-text a.wiki-link {
+  color: #c4b5fd;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(196, 181, 253, 0.45);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.panel .panel-text a.wiki-link:hover {
+  background: rgba(167, 139, 250, 0.16);
+  color: #e8e4ff;
+  border-bottom-color: rgba(232, 228, 255, 0.75);
+}
+
+.panel .panel-text-empty {
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.panel .panel-section.refs-curated {
+  margin-top: 1.2em;
+}
+
+.panel .panel-section.more-reading {
+  margin-top: 1.3em;
+  opacity: 0.9;
+}
