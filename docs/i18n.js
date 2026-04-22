@@ -14,6 +14,7 @@ window.I18N = {
     resetLayout: "레이아웃 초기화",
     physics: "물리 엔진",
     share: "공유",
+    referencesTitle: "근거 자료",
     footer: "VibeMap · 바이브 코딩 입문자용 지도 · v1.0",
   },
   en: {
@@ -31,6 +32,7 @@ window.I18N = {
     resetLayout: "Reset layout",
     physics: "Physics",
     share: "Share",
+    referencesTitle: "References",
     footer: "VibeMap · a map for vibe coders · v1.0",
   },
   ja: {
@@ -48,6 +50,7 @@ window.I18N = {
     resetLayout: "レイアウトをリセット",
     physics: "物理エンジン",
     share: "共有",
+    referencesTitle: "参考資料",
     footer: "VibeMap · バイブコーダーのための地図 · v1.0",
   },
 };
