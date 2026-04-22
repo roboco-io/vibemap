@@ -58,3 +58,33 @@ test('buildKeywordIndex: tolerates missing title languages', () => {
   assert.ok(idx[0].keywords.includes('x'));
   assert.ok(idx[0].keywords.includes('테스트'));
 });
+
+import { normalizeUrl } from './build-references.mjs';
+
+test('normalizeUrl: strips trailing slash', () => {
+  assert.equal(normalizeUrl('https://example.com/'), 'https://example.com');
+  assert.equal(normalizeUrl('https://example.com/path/'), 'https://example.com/path');
+});
+
+test('normalizeUrl: removes utm_* query params', () => {
+  assert.equal(
+    normalizeUrl('https://example.com/?utm_source=x&utm_medium=y'),
+    'https://example.com'
+  );
+  assert.equal(
+    normalizeUrl('https://example.com/?utm_source=x&keep=1'),
+    'https://example.com?keep=1'
+  );
+});
+
+test('normalizeUrl: preserves hash and non-utm query', () => {
+  assert.equal(
+    normalizeUrl('https://example.com/post?id=1#section'),
+    'https://example.com/post?id=1#section'
+  );
+});
+
+test('normalizeUrl: returns original on invalid', () => {
+  assert.equal(normalizeUrl('not a url'), 'not a url');
+  assert.equal(normalizeUrl(''), '');
+});
