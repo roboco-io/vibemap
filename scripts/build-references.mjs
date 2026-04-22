@@ -174,3 +174,56 @@ export function buildKeywordIndex(nodes) {
     return { nodeId: n.id, keywords };
   });
 }
+
+const MAX_PER_NODE = 10;
+const MIN_SCORE = 0.3;
+const MAX_PER_SOURCE = 3;
+
+export function buildReferences(nodes, graph, opts = {}) {
+  const generatedAt = opts.now ?? new Date().toISOString();
+  const source = opts.sourcePath ?? 'graphify-out/graph.json';
+
+  const index = buildKeywordIndex(nodes);
+  const sources = extractSources(graph);
+
+  const byNode = {};
+  const unmapped = [];
+
+  for (const src of sources) {
+    const hits = matchNodes(src.text || src.title, index, {
+      maxPerSource: MAX_PER_SOURCE,
+      minScore: MIN_SCORE,
+    });
+    if (hits.length === 0) {
+      unmapped.push({ url: src.normalizedUrl || src.url, title: src.title, score: 0 });
+      continue;
+    }
+    for (const hit of hits) {
+      (byNode[hit.nodeId] ||= []).push({
+        url: src.normalizedUrl || src.url,
+        title: src.title,
+        excerpt: src.excerpt,
+        lang: detectLang(src.text || src.title),
+        score: Number(hit.score.toFixed(3)),
+      });
+    }
+  }
+
+  for (const id of Object.keys(byNode)) {
+    byNode[id].sort((a, b) => (b.score - a.score) || a.url.localeCompare(b.url));
+    byNode[id] = byNode[id].slice(0, MAX_PER_NODE);
+  }
+
+  return {
+    version: '1',
+    generatedAt,
+    source,
+    stats: {
+      totalSources: sources.length,
+      mappedNodes: Object.keys(byNode).length,
+      unmappedCount: unmapped.length,
+    },
+    byNode,
+    _unmapped: unmapped,
+  };
+}

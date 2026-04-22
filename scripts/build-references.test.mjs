@@ -215,3 +215,79 @@ test('extractSources: returns empty on missing graph', () => {
   assert.deepEqual(extractSources({}), []);
   assert.deepEqual(extractSources(null), []);
 });
+
+import { buildReferences } from './build-references.mjs';
+
+const FIXTURE_NODES = [
+  { id: 'intent', title: { ko: '의도공학', en: 'Intent Engineering', ja: '意図工学' } },
+  { id: 'vibe',   title: { ko: '바이브 코딩', en: 'Vibe Coding',      ja: 'バイブコーディング' } },
+  { id: 'git',    title: { ko: 'Git', en: 'Git', ja: 'Git' } },
+];
+
+test('buildReferences: produces expected schema', () => {
+  const graph = {
+    sources: [
+      { url: 'https://intent.roboco.io/', title: 'Intent Engineering', excerpt: 'Ship intent, not code — a framework for the AI era.' },
+      { url: 'https://roboco.io/posts/the-art-of-vibe-coding/', title: 'The Art of Vibe Coding', excerpt: '바이브 코딩은 AI와 대화하는 기술이다.' },
+    ],
+  };
+  const out = buildReferences(FIXTURE_NODES, graph);
+
+  assert.equal(out.version, '1');
+  assert.equal(out.source, 'graphify-out/graph.json');
+  assert.ok(out.generatedAt);
+  assert.equal(typeof out.stats.totalSources, 'number');
+  assert.equal(typeof out.stats.mappedNodes, 'number');
+  assert.equal(typeof out.stats.unmappedCount, 'number');
+
+  assert.ok(Array.isArray(out.byNode.intent));
+  assert.ok(out.byNode.intent.length >= 1);
+  assert.equal(out.byNode.intent[0].url, 'https://intent.roboco.io');
+  assert.equal(out.byNode.intent[0].lang, 'en');
+  assert.ok(out.byNode.intent[0].score > 0);
+});
+
+test('buildReferences: unmatched sources go to _unmapped', () => {
+  const graph = {
+    sources: [
+      { url: 'https://weather.example/', title: 'Weather Report', excerpt: 'sunny and warm today' },
+    ],
+  };
+  const out = buildReferences(FIXTURE_NODES, graph);
+  assert.equal(out.stats.unmappedCount, 1);
+  assert.equal(out._unmapped.length, 1);
+  assert.equal(Object.keys(out.byNode).length, 0);
+});
+
+test('buildReferences: caps references per node at MAX_PER_NODE (10)', () => {
+  const sources = [];
+  for (let i = 0; i < 15; i++) {
+    sources.push({ url: `https://ex${i}.example/`, title: `Intent Engineering ${i}`, excerpt: 'ship intent' });
+  }
+  const out = buildReferences(FIXTURE_NODES, { sources });
+  assert.ok(out.byNode.intent.length <= 10);
+});
+
+test('buildReferences: byNode only includes keys with at least one ref', () => {
+  const graph = {
+    sources: [
+      { url: 'https://a.example/', title: 'Intent', excerpt: '' },
+    ],
+  };
+  const out = buildReferences(FIXTURE_NODES, graph);
+  assert.ok('intent' in out.byNode);
+  assert.ok(!('git' in out.byNode));
+  assert.ok(!('vibe' in out.byNode));
+});
+
+test('buildReferences: deterministic order (score desc, then url)', () => {
+  const graph = {
+    sources: [
+      { url: 'https://b.example/', title: 'Intent Engineering B', excerpt: 'intent intent' },
+      { url: 'https://a.example/', title: 'Intent Engineering A', excerpt: 'intent intent' },
+    ],
+  };
+  const out = buildReferences(FIXTURE_NODES, graph);
+  const urls = out.byNode.intent.map(r => r.url);
+  assert.deepEqual(urls.slice().sort(), urls);
+});
