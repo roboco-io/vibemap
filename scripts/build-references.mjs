@@ -12,6 +12,61 @@ export function normalizeText(input) {
     .trim();
 }
 
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function isAsciiWord(s) {
+  return /^[a-z0-9][a-z0-9 ]*$/i.test(s);
+}
+
+function countMatches(normalizedText, keyword) {
+  if (!keyword) return { count: 0, totalLen: 0 };
+  const kw = keyword;
+  if (isAsciiWord(kw)) {
+    const re = new RegExp(`\\b${escapeRegex(kw)}\\b`, 'g');
+    const matches = normalizedText.match(re) || [];
+    return { count: matches.length, totalLen: matches.length * kw.length };
+  }
+  if (!kw.trim()) return { count: 0, totalLen: 0 };
+  let count = 0, from = 0;
+  while (true) {
+    const idx = normalizedText.indexOf(kw, from);
+    if (idx < 0) break;
+    count++;
+    from = idx + kw.length;
+  }
+  return { count, totalLen: count * kw.length };
+}
+
+export function matchNodes(rawText, keywordIndex, opts = {}) {
+  const { maxPerSource = 3, minScore = 0.3 } = opts;
+  const text = normalizeText(rawText);
+  if (!text) return [];
+
+  const results = [];
+  for (const entry of keywordIndex) {
+    let hits = 0;
+    let lenSum = 0;
+    const matchedKeywords = [];
+    for (const kw of entry.keywords) {
+      const { count, totalLen } = countMatches(text, kw);
+      if (count > 0) {
+        hits += count;
+        lenSum += totalLen;
+        matchedKeywords.push(kw);
+      }
+    }
+    if (hits === 0) continue;
+    const score = hits * 1.0 + (lenSum / Math.max(1, text.length)) * 2.0;
+    if (score < minScore) continue;
+    results.push({ nodeId: entry.nodeId, score, matchedKeywords });
+  }
+
+  results.sort((a, b) => b.score - a.score);
+  return results.slice(0, maxPerSource);
+}
+
 export function detectLang(text) {
   if (typeof text !== 'string' || !text.trim()) return 'other';
 
