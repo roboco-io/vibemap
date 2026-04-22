@@ -1,7 +1,7 @@
 window.I18N = {
   ko: {
     title: "VibeMap",
-    subtitle: "비개발자를 위한 바이브 코딩 지도",
+    subtitle: "아이디어에서 배포까지, 바이브 코딩의 전체 지도",
     search: "노드 검색…",
     langs: { ko: "한국어", en: "English", ja: "日本語" },
     filters: "카테고리 필터",
@@ -21,7 +21,7 @@ window.I18N = {
   },
   en: {
     title: "VibeMap",
-    subtitle: "A map of vibe coding for non-devs",
+    subtitle: "From idea to deploy — the full map of vibe coding",
     search: "Search nodes…",
     langs: { ko: "한국어", en: "English", ja: "日本語" },
     filters: "Category filters",
@@ -41,7 +41,7 @@ window.I18N = {
   },
   ja: {
     title: "VibeMap",
-    subtitle: "非エンジニア向けバイブコーディング地図",
+    subtitle: "アイデアからデプロイまで — バイブコーディングの全体地図",
     search: "ノード検索…",
     langs: { ko: "한국어", en: "English", ja: "日本語" },
     filters: "カテゴリフィルター",
