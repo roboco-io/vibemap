@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { parseFrontmatter } from './compile-nodes/frontmatter.mjs';
 import { renderSection, splitLanguageSections } from './compile-nodes/markdown.mjs';
 import { validateNode } from './compile-nodes/schema.mjs';
+import { mergeNodes, normalizeEdges, validateEdges } from './compile-nodes/merge.mjs';
 
 const KNOWN_CATS = new Set(['core', 'mindset', 'ai', 'tool', 'tech', 'data', 'ops']);
 
@@ -174,4 +175,33 @@ test('schema: refs lang must be in allowed set', () => {
     },
     { knownCats: KNOWN_CATS, file: 'x.md' }
   ), /lang/);
+});
+
+test('merge: md overrides legacy by id', () => {
+  const legacy = [{ id: 'a', cat: 'ops', size: 3, title: { ko: 'L', en: 'L', ja: 'L' }, body: {} }];
+  const md = [{ id: 'a', cat: 'ops', size: 3, title: { ko: 'M', en: 'M', ja: 'M' } }];
+  const { byId, stats } = mergeNodes({ legacy, md });
+  assert.equal(byId.a.title.ko, 'M');
+  assert.equal(stats.fromMarkdown, 1);
+  assert.equal(stats.fromLegacy, 0);
+});
+
+test('merge: legacy kept when no md with same id', () => {
+  const legacy = [{ id: 'a', cat: 'ops', size: 3, title: { ko: 'L', en: 'L', ja: 'L' } }];
+  const md = [];
+  const { byId, stats } = mergeNodes({ legacy, md });
+  assert.ok(byId.a);
+  assert.equal(stats.fromLegacy, 1);
+});
+
+test('edges: normalize dedupes [a,b] and [b,a]', () => {
+  const out = normalizeEdges([['b', 'a'], ['a', 'b'], ['a', 'c']]);
+  assert.deepEqual(out, [['a', 'b'], ['a', 'c']]);
+});
+
+test('edges: validateEdges flags endpoint missing in byId', () => {
+  const byId = { a: {}, b: {} };
+  const { valid, broken } = validateEdges([['a', 'b'], ['a', 'ghost']], byId);
+  assert.deepEqual(valid, [['a', 'b']]);
+  assert.deepEqual(broken, [['a', 'ghost']]);
 });
