@@ -92,13 +92,6 @@ const LEGACY_NODES = [
       en: "The roster: Claude Code (terminal/agent), Cursor (editor), Copilot (autocomplete), v0/Lovable (prompt-to-app).\n\nPick by purpose. From scratch? Lovable. Editing a codebase? Cursor / Claude Code.",
       ja: "代表選手: Claude Code（ターミナル/エージェント）、Cursor（エディタ）、Copilot（補完）、v0/Lovable（プロンプト→アプリ）。" }
   },
-  { id: "claude-code", cat: "ai", size: 1,
-    title: { ko: "Claude Code", en: "Claude Code", ja: "Claude Code" },
-    body: {
-      ko: "터미널에서 돌아가는 에이전틱 코딩 도구. 파일을 직접 읽고 쓰고, 명령어를 실행하고, 테스트를 돌린다. '시키기'만 하면 되는 주니어 개발자 느낌.",
-      en: "An agentic coding tool that lives in your terminal. Reads and writes files, runs commands, executes tests. Feels like a junior dev you can just *tell*.",
-      ja: "ターミナル上で動くエージェント型コーディングツール。ファイルを直接読み書きし、コマンドを実行し、テストを走らせる。" }
-  },
   { id: "cc-settings", cat: "ai", size: 3,
     title: { ko: "설정 (Settings)", en: "Settings", ja: "設定" },
     body: {
@@ -163,13 +156,6 @@ const LEGACY_NODES = [
       ko: "검은 화면에 글자 치는 그것. `cd`, `ls`, `mkdir` 열 개 정도만 알면 된다. 바이브 코딩에서는 AI가 대신 쳐주지만, '지금 어디 있는지' 정도는 알아야 한다.",
       en: "That black window with text. Ten commands (`cd`, `ls`, `mkdir`, …) will carry you far. AI types for you — but you still need to know *where you are*.",
       ja: "黒い画面に文字を打つアレ。`cd`、`ls`、`mkdir`など10個覚えれば十分。" }
-  },
-  { id: "git", cat: "tool", size: 1,
-    title: { ko: "Git", en: "Git", ja: "Git" },
-    body: {
-      ko: "코드의 타임머신. 저장(commit), 갈래(branch), 합치기(merge) 세 가지가 전부. 실수해도 과거로 돌아갈 수 있다는 안전망.",
-      en: "Time machine for code. Three core verbs: commit, branch, merge. Safety net that lets you screw up and undo.",
-      ja: "コードのタイムマシン。commit、branch、mergeの3つで十分。" }
   },
   { id: "git-basics", cat: "tool", size: 3,
     title: { ko: "Git 기초 개념", en: "Git Basics", ja: "Git基礎" },
@@ -373,13 +359,6 @@ const LEGACY_NODES = [
   },
 
   // ── OPS ────────────────────────────────────────────────
-  { id: "serverless", cat: "ops", size: 1,
-    title: { ko: "AWS 서버리스", en: "AWS Serverless", ja: "AWSサーバーレス" },
-    body: {
-      ko: "서버를 '임대'하는 대신, 함수가 호출될 때만 잠깐 돌고 사라지는 방식. 평소엔 비용 0원, 쓴 만큼만 지불. 비개발자 프로젝트에 특히 좋다.\n\n핵심 블록: Lambda(함수) + API Gateway(입구) + DynamoDB(저장) + S3(파일).",
-      en: "Instead of renting a server, functions spin up when called and vanish. Zero idle cost; pay only when used. Great for solo/non-dev projects.\n\nCore blocks: Lambda (function) + API Gateway (door) + DynamoDB (storage) + S3 (files).",
-      ja: "サーバーを借りる代わりに、関数が呼ばれた時だけ動いて消える方式。普段はコスト0円。" }
-  },
   { id: "lambda", cat: "ops", size: 3,
     title: { ko: "AWS Lambda", en: "AWS Lambda", ja: "AWS Lambda" },
     body: {
@@ -408,13 +387,6 @@ const LEGACY_NODES = [
       en: "File storage. Toss any images, videos, backups — unlimited cloud disk. Cheap and durable.",
       ja: "ファイルストレージ。画像・動画・バックアップを何でも放り込める。" }
   },
-  { id: "cicd", cat: "ops", size: 2,
-    title: { ko: "CI/CD", en: "CI/CD", ja: "CI/CD" },
-    body: {
-      ko: "Continuous Integration / Deployment. '코드 합칠 때마다 자동으로 테스트 + 배포'하는 파이프라인. 한 번 만들어두면 다시는 수동 배포 안 해도 됨.\n\n대표 도구: GitHub Actions.",
-      en: "Continuous Integration / Deployment. A pipeline that auto-tests + auto-deploys on every merge. Build once, never deploy by hand again.\n\nPick: GitHub Actions.",
-      ja: "コードをマージするたびに自動でテスト＋デプロイするパイプライン。" }
-  },
   { id: "vercel", cat: "ops", size: 3,
     title: { ko: "Vercel / Netlify", en: "Vercel / Netlify", ja: "Vercel / Netlify" },
     body: {
@@ -435,13 +407,6 @@ const LEGACY_NODES = [
       ko: "배포 후 '진짜 잘 돌아가는지' 계속 지켜보기. Sentry(에러), Vercel Analytics(사용자), Logs(흐름). AI에게 에러 로그 붙여넣는 습관이 핵심.",
       en: "After deploy, keep watching. Sentry (errors), Vercel Analytics (users), logs (flow). Paste the logs into AI — that's the reflex.",
       ja: "デプロイ後も動きを監視する。Sentry、Vercel Analytics、Logs。" }
-  },
-  { id: "cost", cat: "ops", size: 3,
-    title: { ko: "비용 관리", en: "Cost Control", ja: "コスト管理" },
-    body: {
-      ko: "클라우드는 '무료'로 시작해도 한 번 폭탄 청구서 나오면 악몽. 알림 걸기, 한도 설정, 월 10$ 이하로 시작하기.",
-      en: "Clouds start free, but a surprise bill is nightmare fuel. Set alerts, set caps, start under $10/mo.",
-      ja: "クラウドは無料で始めても、ある日爆弾請求書が来る。アラートと上限を必ず設定。" }
   },
 ];
 
