@@ -6,12 +6,12 @@
       this.nodes = nodes; // each: {id, x, y, vx, vy, fx?, fy?, size}
       this.edges = edges; // each: {source, target}
       this.opts = Object.assign({
-        repulsion: 1800,
-        springLen: 110,
-        springK: 0.04,
-        damping: 0.82,
-        center: 0.006,
-        maxV: 14,
+        repulsion: 3400,    // 1800 → 3400: stronger spread now that we have 75 nodes / 580 edges
+        springLen: 170,     // 110 → 170: longer rest length so connected pairs sit farther apart
+        springK: 0.028,     // 0.04 → 0.028: weaker pull so springs don't collapse the spread
+        damping: 0.84,      // 0.82 → 0.84: a bit more momentum so the larger field settles smoothly
+        center: 0.0035,     // 0.006 → 0.0035: gentler centering — let outer nodes breathe
+        maxV: 18,           // 14 → 18: room for the longer first leg during expansion
       }, opts);
       this.nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
       this.running = true;

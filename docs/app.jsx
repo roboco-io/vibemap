@@ -44,7 +44,8 @@ function App() {
       if (n.id === 'vibe') return { ...n, x: 0, y: 0, vx: 0, vy: 0 };
       const ci = catIndex[n.cat] ?? 0;
       const angle = (ci / cats.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
-      const r = 180 + Math.random() * 180 + n.size * 40;
+      // wider initial scatter — lets the simulator settle into a more open layout
+      const r = 280 + Math.random() * 260 + n.size * 60;
       return {
         ...n,
         x: Math.cos(angle) * r,
@@ -532,11 +533,11 @@ function App() {
             className="iconbtn"
             title={t.resetLayout}
             onClick={() => {
-              // scatter
+              // scatter (matches initial layout spacing)
               for (const n of nodes) {
                 if (n.id === 'vibe') { n.x = 0; n.y = 0; n.vx = 0; n.vy = 0; continue; }
                 const a = Math.random() * Math.PI * 2;
-                const r = 150 + Math.random() * 300;
+                const r = 280 + Math.random() * 360 + n.size * 60;
                 n.x = Math.cos(a) * r; n.y = Math.sin(a) * r; n.vx = 0; n.vy = 0;
               }
               simRef.current?.reheat(1);
