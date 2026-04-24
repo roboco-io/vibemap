@@ -182,55 +182,6 @@ const LEGACY_NODES = [
   },
 
   // ── DATA ───────────────────────────────────────────────
-  { id: "db-basics", cat: "data", size: 2,
-    title: { ko: "데이터베이스 기초", en: "Database Basics", ja: "DB基礎" },
-    body: {
-      ko: "앱이 '기억하는' 장소. 엑셀 시트의 거대한 고성능 버전. CRUD (Create/Read/Update/Delete) 네 가지 동작이 전부.",
-      en: "Where apps *remember* things. Giant performant Excel. Four verbs: CRUD (Create/Read/Update/Delete).",
-      ja: "アプリが「覚える」場所。巨大で高性能なExcel。CRUDの4つだけ。" }
-  },
-  { id: "sql", cat: "data", size: 3,
-    title: { ko: "관계형 DB (SQL)", en: "Relational DB (SQL)", ja: "リレーショナルDB (SQL)" },
-    body: {
-      ko: "표(테이블) 구조로 데이터를 저장하고, 표끼리 연결한다. PostgreSQL, MySQL. 구조가 명확하고 데이터 정합성이 강함.",
-      en: "Store data in tables and link tables. PostgreSQL, MySQL. Strong structure and integrity.",
-      ja: "表構造でデータを保存し、表同士を繋ぐ。PostgreSQL、MySQL。" }
-  },
-  { id: "nosql", cat: "data", size: 3,
-    title: { ko: "NoSQL", en: "NoSQL", ja: "NoSQL" },
-    body: {
-      ko: "자유로운 구조(JSON 문서 등)로 저장. MongoDB, DynamoDB. 빠르고 유연하지만 '관계'를 표현하기 어렵다.",
-      en: "Store freeform shapes (JSON docs). MongoDB, DynamoDB. Fast and flexible, weak at relations.",
-      ja: "自由な構造で保存。MongoDB、DynamoDB。高速で柔軟だが「関係」表現が苦手。" }
-  },
-  { id: "sql-vs-nosql", cat: "data", size: 3,
-    title: { ko: "SQL vs NoSQL", en: "SQL vs NoSQL", ja: "SQL vs NoSQL" },
-    body: {
-      ko: "고민되면 SQL (PostgreSQL). 확장성·유연성이 극단적으로 필요하면 NoSQL. 초보자 90% 케이스는 Postgres 정답.",
-      en: "When in doubt: SQL (PostgreSQL). Need extreme scale or flex? NoSQL. 90% of beginner cases → Postgres.",
-      ja: "迷ったらSQL (PostgreSQL)。極端な拡張性・柔軟性が必要ならNoSQL。" }
-  },
-  { id: "dw", cat: "data", size: 3,
-    title: { ko: "데이터 웨어하우스 (DW)", en: "Data Warehouse", ja: "データウェアハウス" },
-    body: {
-      ko: "분석용 대형 창고. 정제된 구조화 데이터를 쌓아두고 비즈니스 질문에 답한다. Snowflake, BigQuery, Redshift.",
-      en: "Big analytics warehouse. Structured cleaned data for business questions. Snowflake, BigQuery, Redshift.",
-      ja: "分析用の大型倉庫。Snowflake、BigQuery、Redshift。" }
-  },
-  { id: "datalake", cat: "data", size: 3,
-    title: { ko: "데이터 레이크", en: "Data Lake", ja: "データレイク" },
-    body: {
-      ko: "정제 안 된 모든 원시 데이터를 호수처럼 쏟아붓는 곳. 나중에 필요한 걸 건져 쓴다. DW보다 유연, 덜 정리됨.",
-      en: "Dump *all* raw data into a lake. Fish out what you need later. More flexible than DW, less tidy.",
-      ja: "未整理のあらゆる生データを湖のように貯める場所。" }
-  },
-  { id: "db-vs-dw", cat: "data", size: 3,
-    title: { ko: "DB vs DW vs Lake", en: "DB vs DW vs Lake", ja: "DB vs DW vs Lake" },
-    body: {
-      ko: "DB = 서비스 운영용 창고 (빠른 입출고). DW = 분석용 창고 (구조화된 질의). Lake = 뭐든 다 쏟아붓는 저수지.",
-      en: "DB = operational storage (fast ops). DW = analytics storage (structured queries). Lake = the reservoir where anything goes.",
-      ja: "DB=運用用、DW=分析用、Lake=何でも貯める貯水池。" }
-  },
 
   // ── OPS ────────────────────────────────────────────────
   { id: "lambda", cat: "ops", size: 3,
