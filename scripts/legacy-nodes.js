@@ -184,55 +184,6 @@ const LEGACY_NODES = [
   // ── DATA ───────────────────────────────────────────────
 
   // ── OPS ────────────────────────────────────────────────
-  { id: "lambda", cat: "ops", size: 3,
-    title: { ko: "AWS Lambda", en: "AWS Lambda", ja: "AWS Lambda" },
-    body: {
-      ko: "'함수 한 개'를 클라우드에 올려놓고 호출될 때만 실행. 전기세가 아니라 '버튼 누른 횟수'로 과금.",
-      en: "Upload a single function; it runs only when called. Billed by invocations, not by hours.",
-      ja: "関数一つをクラウドに置き、呼ばれた時だけ実行。" }
-  },
-  { id: "apigw", cat: "ops", size: 3,
-    title: { ko: "API Gateway", en: "API Gateway", ja: "API Gateway" },
-    body: {
-      ko: "Lambda로 들어오는 인터넷 요청의 '현관문'. URL을 함수에 연결해준다.",
-      en: "The front door for internet requests into Lambda. Maps URLs to functions.",
-      ja: "Lambdaへのリクエストの玄関。" }
-  },
-  { id: "dynamodb", cat: "ops", size: 3,
-    title: { ko: "DynamoDB", en: "DynamoDB", ja: "DynamoDB" },
-    body: {
-      ko: "AWS의 서버리스 NoSQL. 설치·운영 필요 없고 자동 확장. 서버리스 스택의 기본 DB.",
-      en: "AWS's serverless NoSQL. No setup, auto-scales. The default DB for serverless stacks.",
-      ja: "AWSのサーバーレスNoSQL。自動スケール。" }
-  },
-  { id: "s3", cat: "ops", size: 3,
-    title: { ko: "S3", en: "S3", ja: "S3" },
-    body: {
-      ko: "파일 저장소. 이미지·동영상·백업 아무거나 던져넣는 무제한 클라우드 하드. 싸고 튼튼하다.",
-      en: "File storage. Toss any images, videos, backups — unlimited cloud disk. Cheap and durable.",
-      ja: "ファイルストレージ。画像・動画・バックアップを何でも放り込める。" }
-  },
-  { id: "vercel", cat: "ops", size: 3,
-    title: { ko: "Vercel / Netlify", en: "Vercel / Netlify", ja: "Vercel / Netlify" },
-    body: {
-      ko: "GitHub 연결 한 번으로 '푸시하면 자동 배포'되는 마법 서비스. 비개발자·프론트엔드 프로젝트는 99% 이걸로 충분. 무료 티어 후한 편.",
-      en: "Connect GitHub once; every push auto-deploys. Magic for non-devs and frontend projects. Generous free tier.",
-      ja: "GitHub連携一発で、プッシュすれば自動デプロイ。" }
-  },
-  { id: "domain", cat: "ops", size: 3,
-    title: { ko: "도메인 & 호스팅", en: "Domain & Hosting", ja: "ドメイン・ホスティング" },
-    body: {
-      ko: "도메인(example.com) = 주소. 호스팅 = 집. 요즘은 Vercel이 호스팅, Cloudflare/Route53이 도메인이 무난한 조합.",
-      en: "Domain = address. Hosting = house. Today's safe combo: Vercel (hosting) + Cloudflare / Route53 (domain).",
-      ja: "ドメイン=住所、ホスティング=家。" }
-  },
-  { id: "monitoring", cat: "ops", size: 3,
-    title: { ko: "모니터링", en: "Monitoring", ja: "モニタリング" },
-    body: {
-      ko: "배포 후 '진짜 잘 돌아가는지' 계속 지켜보기. Sentry(에러), Vercel Analytics(사용자), Logs(흐름). AI에게 에러 로그 붙여넣는 습관이 핵심.",
-      en: "After deploy, keep watching. Sentry (errors), Vercel Analytics (users), logs (flow). Paste the logs into AI — that's the reflex.",
-      ja: "デプロイ後も動きを監視する。Sentry、Vercel Analytics、Logs。" }
-  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEGACY_NODES;
