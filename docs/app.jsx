@@ -33,6 +33,8 @@ function App() {
   const sizeRef = useRef({ w: 800, h: 600 });
   const dragRef = useRef(null);
   const panRef = useRef(null);
+  const preZoomRef = useRef(null);   // transform to restore when active node is cleared
+  const userOverrideRef = useRef(false); // set when user pans/wheels; suspends auto-follow
 
   // Initialize node positions (roughly by category angular sectors)
   const [nodes] = useState(() => {
@@ -218,6 +220,7 @@ function App() {
   // Zoom handling
   const onWheel = (e) => {
     e.preventDefault();
+    userOverrideRef.current = true; // stop auto-follow
     const { x, y, k } = transform;
     const factor = Math.exp(-e.deltaY * 0.0015);
     const newK = Math.max(0.25, Math.min(3, k * factor));
@@ -236,6 +239,7 @@ function App() {
   // Panning
   const onMouseDown = (e) => {
     if (e.target.closest('.node-g')) return;
+    userOverrideRef.current = true; // background drag = user control
     panRef.current = { sx: e.clientX, sy: e.clientY, x: transform.x, y: transform.y };
   };
   const onMouseMove = (e) => {
@@ -271,8 +275,10 @@ function App() {
     if (e.touches.length === 1) {
       const t = e.touches[0];
       if (e.target.closest('.node-g')) return;
+      userOverrideRef.current = true;
       panRef.current = { sx: t.clientX, sy: t.clientY, x: transform.x, y: transform.y };
     } else if (e.touches.length === 2) {
+      userOverrideRef.current = true;
       panRef.current = null;
       const [a, b] = e.touches;
       touchRef.current = {
@@ -331,6 +337,71 @@ function App() {
 
   const activeNode = activeId ? nodes.find(n => n.id === activeId) : null;
   const activeCat = activeNode ? DATA.categories[activeNode.cat] : null;
+
+  // Zoom-to-node animation: on activeId change, smoothly focus or restore.
+  // Follows the live node position (physics keeps nodes drifting), and releases
+  // control the moment the user wheels/pans.
+  useEffect(() => {
+    userOverrideRef.current = false;
+
+    // Save transform to restore on close. Only on initial open — switching
+    // between active nodes should preserve the original pre-zoom state.
+    if (activeId && preZoomRef.current === null) {
+      preZoomRef.current = { ...transform };
+    }
+
+    let raf = 0;
+    const LERP = 0.14;
+    const ZOOM_K = 1.9;
+    const EPS_POS = 0.3;
+    const EPS_K = 0.002;
+
+    const frame = () => {
+      if (userOverrideRef.current) return; // user took control — stop animating
+
+      let target;
+      let following = false;
+      if (activeNode) {
+        const { w } = sizeRef.current;
+        const narrow = w < 820; // panel goes full-width below this breakpoint
+        const panelOffset = narrow ? 0 : 210; // ~half of 420px panel
+        target = {
+          x: -activeNode.x * ZOOM_K - panelOffset,
+          y: -activeNode.y * ZOOM_K,
+          k: ZOOM_K,
+        };
+        following = true;
+      } else if (preZoomRef.current) {
+        target = preZoomRef.current;
+      } else {
+        return; // nothing to animate
+      }
+
+      setTransform((cur) => {
+        const dx = target.x - cur.x;
+        const dy = target.y - cur.y;
+        const dk = target.k - cur.k;
+        const settled = Math.abs(dx) < EPS_POS && Math.abs(dy) < EPS_POS && Math.abs(dk) < EPS_K;
+        if (settled && !following) {
+          preZoomRef.current = null; // restoration complete; clear saved state
+          return { x: target.x, y: target.y, k: target.k };
+        }
+        if (settled && following) {
+          return cur; // already focused, no state change needed
+        }
+        return {
+          x: cur.x + dx * LERP,
+          y: cur.y + dy * LERP,
+          k: cur.k + dk * LERP,
+        };
+      });
+
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
 
   // Counts per cat
   const catCounts = useMemo(() => {
@@ -469,6 +540,9 @@ function App() {
                 n.x = Math.cos(a) * r; n.y = Math.sin(a) * r; n.vx = 0; n.vy = 0;
               }
               simRef.current?.reheat(1);
+              setActiveId(null);           // also clear focus so zoom-follow releases
+              preZoomRef.current = null;   // and drop saved pre-zoom state
+              userOverrideRef.current = false;
               setTransform({ x: 0, y: 0, k: 1 });
             }}
           >
