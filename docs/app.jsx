@@ -237,11 +237,18 @@ function App() {
     setTransform({ x: newX, y: newY, k: newK });
   };
 
+  // Distance threshold (in pixels) above which a press becomes a pan
+  // rather than a click. Prevents accidental dismiss on slight finger jitter.
+  const CLICK_SLOP_SQ = 25; // 5px
+
   // Panning
   const onMouseDown = (e) => {
     if (e.target.closest('.node-g')) return;
-    userOverrideRef.current = true; // background drag = user control
-    panRef.current = { sx: e.clientX, sy: e.clientY, x: transform.x, y: transform.y };
+    panRef.current = {
+      sx: e.clientX, sy: e.clientY,
+      x: transform.x, y: transform.y,
+      moved: false, // becomes true once movement exceeds CLICK_SLOP_SQ
+    };
   };
   const onMouseMove = (e) => {
     // node drag
@@ -258,7 +265,13 @@ function App() {
     if (panRef.current) {
       const dx = e.clientX - panRef.current.sx;
       const dy = e.clientY - panRef.current.sy;
-      setTransform((t) => ({ ...t, x: panRef.current.x + dx, y: panRef.current.y + dy }));
+      if (!panRef.current.moved && (dx * dx + dy * dy) > CLICK_SLOP_SQ) {
+        panRef.current.moved = true;
+        userOverrideRef.current = true; // genuine pan now suspends auto-follow
+      }
+      if (panRef.current.moved) {
+        setTransform((t) => ({ ...t, x: panRef.current.x + dx, y: panRef.current.y + dy }));
+      }
     }
   };
   const onMouseUp = () => {
@@ -267,7 +280,13 @@ function App() {
       n.fx = null; n.fy = null;
       dragRef.current = null;
     }
-    panRef.current = null;
+    if (panRef.current) {
+      // Click on empty area (no drag) — dismiss the active panel if open.
+      if (!panRef.current.moved && activeId) {
+        setActiveId(null);
+      }
+      panRef.current = null;
+    }
   };
 
   // Touch (basic)
@@ -276,8 +295,11 @@ function App() {
     if (e.touches.length === 1) {
       const t = e.touches[0];
       if (e.target.closest('.node-g')) return;
-      userOverrideRef.current = true;
-      panRef.current = { sx: t.clientX, sy: t.clientY, x: transform.x, y: transform.y };
+      panRef.current = {
+        sx: t.clientX, sy: t.clientY,
+        x: transform.x, y: transform.y,
+        moved: false,
+      };
     } else if (e.touches.length === 2) {
       userOverrideRef.current = true;
       panRef.current = null;
@@ -304,7 +326,13 @@ function App() {
       const t = e.touches[0];
       const dx = t.clientX - panRef.current.sx;
       const dy = t.clientY - panRef.current.sy;
-      setTransform((tr) => ({ ...tr, x: panRef.current.x + dx, y: panRef.current.y + dy }));
+      if (!panRef.current.moved && (dx * dx + dy * dy) > CLICK_SLOP_SQ) {
+        panRef.current.moved = true;
+        userOverrideRef.current = true;
+      }
+      if (panRef.current.moved) {
+        setTransform((tr) => ({ ...tr, x: panRef.current.x + dx, y: panRef.current.y + dy }));
+      }
     } else if (e.touches.length === 2 && touchRef.current) {
       const [a, b] = e.touches;
       const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
@@ -314,7 +342,13 @@ function App() {
   };
   const onTouchEnd = () => {
     if (dragRef.current) { dragRef.current.node.fx = null; dragRef.current.node.fy = null; dragRef.current = null; }
-    panRef.current = null; touchRef.current = null;
+    if (panRef.current) {
+      if (!panRef.current.moved && activeId) {
+        setActiveId(null);
+      }
+      panRef.current = null;
+    }
+    touchRef.current = null;
   };
 
   // Node click / drag
