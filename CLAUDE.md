@@ -97,6 +97,28 @@ raw/urls/*.md  ──graphify update──▶  graphify-out/graph.json  ──bu
 - **GitHub Pages 배포**: `git push`만으로 자동 배포. CI 없음. `make e2e`는 최소한의 스모크 체크(HTTP 200 · references.json 매핑 수 · nodes.json body 수 출력)를 제공하므로 배포 전 실행 권장.
 - **의존성 추가 금지 원칙**: 빌드 도구·번들러·npm 의존성을 도입하지 마세요. React/Babel은 CDN UMD로 불러오고, 스크립트는 Node 내장 API로만 작성합니다. 이 제약이 "비개발자가 `python3 -m http.server`만으로 돌려볼 수 있다"는 교육적 가치의 핵심입니다.
 
+## Current focus
+
+> 이 섹션은 *세션 간 상태*를 담는다. 포커스가 바뀌면 이 블록만 업데이트하고, 이력은 `specs/` 아래로 남긴다.
+
+- **2026-Q2 포커스**: 레거시 노드 54개를 `raw/nodes/*.md`로 승격. 최근 파일럿 5개(cicd, claude-code, serverless, git, cost) 완료 — 품질 기준 확정.
+- **다음 승격 후보** (연결도 ≥ 6 & 여전히 legacy): `lambda`, `dynamodb`, `s3`, `container`, `monitoring`, `mcp`, `agentic`, `intent`, `prompt-eng`, `context-eng`.
+- **"더 읽을 자료" 영역**: `raw/urls/`에 source 2개뿐 → 신규 노드 11개에 매칭 없음. 필요해지면 `/vibemap-ingest <URL>`로 점진 추가.
+- **보강 워크플로우**: `vibemap-migrate-legacy` 스킬이 리서치→작성→legacy 삭제→컴파일→커밋을 5~8개 단위 배치로 담당. 수치 확인은 `/vibemap-check`.
+
+## Harness
+
+로컬 하네스(`.claude/`)가 아래를 강제·보조한다. 편집하면 즉시 다음 세션부터 반영된다.
+
+- **`.claude/settings.json`** — `docs/data.js|nodes.json|references.json`의 직접 편집 차단(`deny`), 일상 명령 allowlist로 permission 프롬프트 감소.
+- **PostToolUse 훅 `post-edit-compile.sh`** — `raw/nodes/*.md` 또는 `scripts/legacy-*.js`를 Edit/Write하면 즉시 `make compile`. 실패 시 블록.
+- **PreToolUse 훅 `pre-commit-drift.sh`** — `git commit`이 raw/legacy 변경을 스테이지했는데 `docs/data.js`·`docs/nodes.json`이 빠지면 블록. "raw만 커밋하고 docs 잊기" 사고 방지.
+- **`/vibemap-check`** — `make compile` + `make test` + `build-references` 후 한 줄 요약.
+- **`/vibemap-ingest <URL>`** — 외부 글을 `raw/urls/`에 넣고 references.json 재생성.
+- **`vibemap-add-node` 스킬** — 새 키워드를 노드로 추가 (리서치→작성→컴파일→커밋).
+- **`vibemap-migrate-legacy` 스킬** — 기존 레거시 id 들을 배치로 md 승격.
+- **`vibemap-node-reviewer` 서브에이전트** — md 노드 품질·포맷 검사(푸시 전 또는 `make compile` 전에 호출). 에이전트는 파일을 수정하지 않는다.
+
 ## Specs
 
 주요 설계 결정은 `specs/superpowers/specs/`와 `specs/superpowers/plans/`에 날짜별로 보관됩니다. 아키텍처 변경 전 기존 스펙을 먼저 읽으세요.
