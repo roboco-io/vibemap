@@ -20,62 +20,6 @@ const LEGACY_NODES = [
       en: "\"Ship intent, not code.\" AI made generation cheap; without intent that speed is noise, with it it's clarity.\n\nAn Intent Document has exactly four sections:\n• Why — why it must exist (problem, goal, success bar)\n• What — what to build (features, flows, edges)\n• Not — lines AI cannot cross (scope, security, quality)\n• Learnings — what you tried and discovered\n\nCore rule: never write *How*. Stack, architecture, timeline — AI chooses. Humans own Why/What/Not and judge the outcome.\n\nIntent isn't static: seed → exploring → clarified → build, or killed at any point. Killing fast is good.\n\n'Build a good app' ❌ (noise)\n'New users reach value in 30 seconds' ✅ (intent)",
       ja: "\"Ship intent, not code.\" コードではなく「意図」をデプロイするという考え方。AIが生成を安くした時代に、速度を騒音ではなく明快さに変える技術。\n\nIntent Documentの4セクション:\n• Why — なぜ存在するか\n• What — 何を作るか\n• Not — AIが越えてはならない線\n• Learnings — 何を試し何を学んだか\n\n原則: Howは書かない。スタック・アーキテクチャ・スケジュールはAIが選ぶ。人間はWhy/What/Notだけ握り、結果を判断する。\n\n意図は静的ではない。seed→exploring→clarified→build、または いつでもkilled。早く殺すのは良いこと。\n\n「良いアプリを作る」❌（騒音）\n「新規ユーザーが30秒で価値に到達」✅（意図）" }
   },
-  { id: "requirements", cat: "mindset", size: 2,
-    title: { ko: "요건 정의", en: "Requirements", ja: "要件定義" },
-    body: {
-      ko: "코드를 쓰기 전에 '누가, 무엇을, 왜' 답하는 단계. 비개발자가 가장 강한 영역이다.\n\n비유: 집을 짓기 전 설계도 그리기. 벽 세우고 나서 '아 문이 필요했네'하면 늦다.",
-      en: "Answering 'who, what, why' *before* code. Non-devs often crush this step.\n\nAnalogy: Draw the floor plan before pouring concrete. Realizing you needed a door *after* the wall is up is expensive.",
-      ja: "コードを書く前に「誰が・何を・なぜ」に答える段階。非エンジニアが最も強い領域。" }
-  },
-  { id: "prompt-eng", cat: "mindset", size: 2,
-    title: { ko: "프롬프트 엔지니어링", en: "Prompt Engineering", ja: "プロンプト工学" },
-    body: {
-      ko: "AI에게 '잘 부탁하는' 기술. 역할·맥락·예시·출력형식 네 가지를 챙기면 80%는 끝난다.\n\n치트키: '단계적으로 생각해줘', '예시 먼저 보여줘', '이 코드의 문제를 3가지로 정리해줘'",
-      en: "The craft of asking an AI *well*. Role, context, examples, output format — cover these four and you're 80% there.\n\nCheat codes: 'think step by step', 'show me an example first', 'summarize the issues in 3 bullets'.",
-      ja: "AIに「うまく頼む」技術。役割・文脈・例・出力形式の4つを押さえれば8割終わる。" }
-  },
-  { id: "context-eng", cat: "mindset", size: 2,
-    title: { ko: "컨텍스트 엔지니어링", en: "Context Engineering", ja: "コンテキスト工学" },
-    body: {
-      ko: "AI에게 '지금 이 상황'을 알려주는 기술. 프롬프트보다 한 단계 위 — 전체 프로젝트 구조, 관련 파일, 제약사항을 함께 제공한다.\n\n비유: 신입사원에게 업무 지시하기. '이거 해줘' 말고 '우리 팀은 이렇게 일하고, 이 프로젝트는 이래, 이 파일 참고해줘'.",
-      en: "Telling the AI *what situation it's in*. One level above prompting — you bring project structure, related files, and constraints with the ask.\n\nAnalogy: Onboarding a new hire, not just handing off a ticket.",
-      ja: "AIに「今のこの状況」を伝える技術。プロンプトより一段上—プロジェクト構造や関連ファイル、制約を一緒に渡す。" }
-  },
-  { id: "convergence", cat: "mindset", size: 3,
-    title: { ko: "수렴 사고", en: "Convergence", ja: "収束思考" },
-    body: {
-      ko: "한 번에 완벽한 답을 기대하지 않고, 작게 시도하며 점점 좋은 결과로 수렴시키는 사고. AI의 비결정성을 신뢰로 바꾸는 핵심 원리.",
-      en: "Don't expect one perfect answer. Try small, iterate, let results *converge*. This is how you turn AI's non-determinism into trust.",
-      ja: "一度で完璧な答えを期待せず、小さく試しながら徐々に良い結果へ収束させる思考。" }
-  },
-  { id: "small-steps", cat: "mindset", size: 3,
-    title: { ko: "작은 단계", en: "Small Steps", ja: "小さな一歩" },
-    body: {
-      ko: "한 번에 다 하려 하지 말기. '로그인 만들어줘'보다 '이메일 입력창만 먼저' → '검증 추가' → '제출 로직' 순서가 훨씬 잘 된다.",
-      en: "Don't one-shot it. 'Just the email field' → 'add validation' → 'submit logic' converges way faster than 'build login'.",
-      ja: "一度に全部やろうとしない。小さく区切って積み上げる。" }
-  },
-  { id: "simplify", cat: "mindset", size: 3,
-    title: { ko: "과감한 단순화", en: "Aggressive Simplicity", ja: "思い切った単純化" },
-    body: {
-      ko: "LLM은 필요없는 추상화와 클래스를 잔뜩 만든다. '이거 꼭 필요해?' 물어보고 지워라. 단순할수록 버그가 적고 고치기 쉽다.",
-      en: "LLMs over-engineer by default. Ask 'do we actually need this?' and delete. Simpler = fewer bugs and easier fixes.",
-      ja: "LLMは不要な抽象化やクラスを作りがち。「本当に必要？」と問うて削る。" }
-  },
-  { id: "pitfalls", cat: "mindset", size: 2,
-    title: { ko: "바이브 코딩의 함정", en: "Pitfalls", ja: "落とし穴" },
-    body: {
-      ko: "① 작동하지만 이해 못 하는 코드 쌓임 ② 보안 구멍 방치 ③ AI가 지어낸 가짜 라이브러리 사용 ④ 테스트 없는 상태로 배포.\n\n대응: 항상 '왜 이렇게 짰는지' 물어보고, 작은 단위로 검증하라.",
-      en: "(1) code that works but you don't understand (2) quiet security holes (3) hallucinated libraries (4) shipping without tests.\n\nDefense: always ask 'why did you write it this way?' and verify in small chunks.",
-      ja: "動くが理解していないコードの蓄積、放置されたセキュリティ穴、AIが捏造したライブラリ、テストなしデプロイ。" }
-  },
-  { id: "review-mindset", cat: "mindset", size: 3,
-    title: { ko: "AI 코드 검토 습관", en: "Reviewing AI Code", ja: "AIコードレビュー習慣" },
-    body: {
-      ko: "AI가 쓴 코드를 '내 코드처럼' 읽는 습관. 한 줄씩 읽고, 이해 안 되면 설명을 요청하라. 이해 못 한 코드는 내일의 버그다.",
-      en: "Read AI code like it's yours. Line by line. Ask for an explanation of anything fuzzy — code you don't understand is tomorrow's bug.",
-      ja: "AIの書いたコードを「自分のコード」のように読む習慣。わからないところは必ず説明させる。" }
-  },
 
   // ── AI ─────────────────────────────────────────────────
   { id: "llm-basics", cat: "ai", size: 2,
