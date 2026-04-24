@@ -101,10 +101,9 @@ raw/urls/*.md  ──graphify update──▶  graphify-out/graph.json  ──bu
 
 > 이 섹션은 *세션 간 상태*를 담는다. 포커스가 바뀌면 이 블록만 업데이트하고, 이력은 `specs/` 아래로 남긴다.
 
-- **2026-Q2 포커스**: 레거시 노드 54개를 `raw/nodes/*.md`로 승격. 최근 파일럿 5개(cicd, claude-code, serverless, git, cost) 완료 — 품질 기준 확정.
-- **다음 승격 후보** (연결도 ≥ 6 & 여전히 legacy): `lambda`, `dynamodb`, `s3`, `container`, `monitoring`, `mcp`, `agentic`, `intent`, `prompt-eng`, `context-eng`.
-- **"더 읽을 자료" 영역**: `raw/urls/`에 source 2개뿐 → 신규 노드 11개에 매칭 없음. 필요해지면 `/vibemap-ingest <URL>`로 점진 추가.
-- **보강 워크플로우**: `vibemap-migrate-legacy` 스킬이 리서치→작성→legacy 삭제→컴파일→커밋을 5~8개 단위 배치로 담당. 수치 확인은 `/vibemap-check`.
+- **레거시 마이그레이션 완료 (2026-04-24)**: 75개 노드 전부 `raw/nodes/*.md` 기반. `scripts/legacy-nodes.js`는 빈 껍데기(셸)로 남음 — 필요 시 후속 PR로 완전 제거 가능.
+- **다음 포커스 후보**: (a) "더 읽을 자료" 보강 — `/vibemap-ingest <URL>`로 외부 글을 `raw/urls/`에 점진 추가 (현재 매핑 4개뿐). (b) 노드 간 cross-reference 밀도 추가 검토 — 현재 580 edges이며 `graphify query`로 god node 재평가. (c) `extraEdges` 활용 — 본문에 자연스럽게 못 녹인 관계를 frontmatter로 선언.
+- **신규 노드 추가 워크플로우**: `/vibemap-add-node <keyword>` 또는 `vibemap-add-node` 스킬. 기존 노드 편집은 그냥 raw/nodes/*.md 직접 수정 (hook이 자동 compile).
 
 ## Harness
 
