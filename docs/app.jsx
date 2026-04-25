@@ -288,7 +288,13 @@ function App() {
         userOverrideRef.current = true; // genuine pan now suspends auto-follow
       }
       if (panRef.current.moved) {
-        setTransform((t) => ({ ...t, x: panRef.current.x + dx, y: panRef.current.y + dy }));
+        // Capture pan origin in a closure: setTransform's functional updater
+        // runs in the render phase, by which time onMouseUp may have already
+        // nulled panRef.current. Reading panRef.current.x there would throw
+        // and unmount the whole tree.
+        const baseX = panRef.current.x;
+        const baseY = panRef.current.y;
+        setTransform((t) => ({ ...t, x: baseX + dx, y: baseY + dy }));
       }
     }
   };
@@ -349,7 +355,11 @@ function App() {
         userOverrideRef.current = true;
       }
       if (panRef.current.moved) {
-        setTransform((tr) => ({ ...tr, x: panRef.current.x + dx, y: panRef.current.y + dy }));
+        // Same closure capture as onMouseMove — touchend may null panRef.current
+        // before React invokes the functional updater.
+        const baseX = panRef.current.x;
+        const baseY = panRef.current.y;
+        setTransform((tr) => ({ ...tr, x: baseX + dx, y: baseY + dy }));
       }
     } else if (e.touches.length === 2 && touchRef.current) {
       const [a, b] = e.touches;
