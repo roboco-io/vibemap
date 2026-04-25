@@ -20,6 +20,10 @@ function App() {
   const [query, setQuery] = useState('');
   const [enabledCats, setEnabledCats] = useState(() => new Set(Object.keys(DATA.categories)));
   const [physics, setPhysics] = useState(true);
+  const [spacing, setSpacing] = useState(() => {
+    const v = parseFloat(localStorage.getItem('vibemap.spacing'));
+    return Number.isFinite(v) && v >= 0.5 && v <= 2.5 ? v : 1.0;
+  });
   const [introGone, setIntroGone] = useState(false);
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const [entryProgress, setEntryProgress] = useState(0); // 0→1 ripple reveal
@@ -163,6 +167,20 @@ function App() {
 
   // Persist lang
   useEffect(() => { localStorage.setItem('vibemap.lang', lang); }, [lang]);
+
+  // Spacing slider — scales repulsion + spring rest length together so the
+  // graph expands or contracts uniformly. Persisted to localStorage so the
+  // user's preference survives reloads.
+  useEffect(() => {
+    const sim = simRef.current;
+    if (!sim) return;
+    const BASE_REPULSION = 3400;
+    const BASE_SPRING_LEN = 170;
+    sim.opts.repulsion = BASE_REPULSION * spacing;
+    sim.opts.springLen = BASE_SPRING_LEN * spacing;
+    sim.reheat(0.5);
+    localStorage.setItem('vibemap.spacing', String(spacing));
+  }, [spacing]);
 
   // Node reveal order — BFS from center
   const revealOrder = useMemo(() => {
@@ -563,6 +581,22 @@ function App() {
               <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" />
             </svg>
           </button>
+          <div className="spacing-control" title={`${t.spacing}: ${spacing.toFixed(2)}×`}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="5" cy="12" r="2.5" />
+              <circle cx="19" cy="12" r="2.5" />
+              <line x1="8" y1="12" x2="16" y2="12" strokeDasharray="2 3" />
+            </svg>
+            <input
+              type="range"
+              min="0.5"
+              max="2.0"
+              step="0.05"
+              value={spacing}
+              onChange={(e) => setSpacing(parseFloat(e.target.value))}
+              aria-label={t.spacing}
+            />
+          </div>
           <button
             className="iconbtn"
             title={t.resetLayout}

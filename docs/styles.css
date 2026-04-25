@@ -220,6 +220,54 @@ html, body {
 .iconbtn:hover { color: var(--ink); background: rgba(167, 139, 250, 0.12); }
 .iconbtn.on { color: #f0abfc; background: rgba(167, 139, 250, 0.2); }
 
+/* Node-spacing slider in the topbar */
+.spacing-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--ink-soft);
+}
+.spacing-control svg { flex-shrink: 0; }
+.spacing-control input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100px;
+  height: 4px;
+  margin: 0;
+  background: rgba(196, 181, 253, 0.18);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.spacing-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #c4b5fd;
+  border: 2px solid rgba(15, 13, 30, 0.95);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.spacing-control input[type="range"]::-webkit-slider-thumb:hover { background: #f0abfc; transform: scale(1.1); }
+.spacing-control input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #c4b5fd;
+  border: 2px solid rgba(15, 13, 30, 0.95);
+  cursor: pointer;
+}
+.spacing-control input[type="range"]::-moz-range-thumb:hover { background: #f0abfc; }
+
 /* ── left legend / filters ─────────────────────────────── */
 .legend {
   position: fixed;
@@ -437,6 +485,8 @@ html, body {
   .legend { left: 12px; bottom: 12px; padding: 10px 12px; min-width: 160px; }
   .hint { display: none; }
   .panel { width: 100vw; }
+  .spacing-control { padding: 0 8px; }
+  .spacing-control input[type="range"] { width: 70px; }
 }
 
 /* References section (graphify-sourced) */
