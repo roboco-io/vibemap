@@ -578,7 +578,17 @@ function App() {
               placeholder={t.search}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Escape') setQuery(''); }}
             />
+            {query && (
+              <button
+                type="button"
+                className="search-clear"
+                onClick={() => setQuery('')}
+                title={t.clearSearch}
+                aria-label={t.clearSearch}
+              >×</button>
+            )}
           </div>
           <button
             className={`iconbtn ${physics ? 'on' : ''}`}
