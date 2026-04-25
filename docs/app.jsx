@@ -13,17 +13,52 @@ function sizeRadius(size) {
   return size === 1 ? 14 : size === 2 ? 9 : 6;
 }
 
+// Read shareable view state from the URL on first mount. Each key is optional
+// so a bare URL like /?node=harness-eng works the same as a fully-specified
+// one. Order of precedence on init: URL ▶ localStorage ▶ hardcoded default.
+function readUrlState() {
+  const p = new URLSearchParams(window.location.search);
+  const cats = p.get('cats');
+  const spacing = parseFloat(p.get('s'));
+  return {
+    lang: p.get('lang'),
+    node: p.get('node'),
+    q: p.get('q') || '',
+    cats: cats ? cats.split(',').filter(Boolean) : null,
+    spacing: Number.isFinite(spacing) ? spacing : null,
+    physics: p.get('physics') !== 'off', // default true
+  };
+}
+const URL_INIT = readUrlState();
+const ALL_CATS = Object.keys(DATA.categories);
+const VALID_NODE_IDS = new Set(DATA.nodes.map((n) => n.id));
+const VALID_LANGS = ['ko', 'en', 'ja'];
+
 function App() {
-  const [lang, setLang] = useState(() => localStorage.getItem('vibemap.lang') || 'ko');
-  const [activeId, setActiveId] = useState(null);
+  const [lang, setLang] = useState(() => {
+    if (URL_INIT.lang && VALID_LANGS.includes(URL_INIT.lang)) return URL_INIT.lang;
+    return localStorage.getItem('vibemap.lang') || 'en';
+  });
+  const [activeId, setActiveId] = useState(() => (
+    URL_INIT.node && VALID_NODE_IDS.has(URL_INIT.node) ? URL_INIT.node : null
+  ));
   const [hoverId, setHoverId] = useState(null);
-  const [query, setQuery] = useState('');
-  const [enabledCats, setEnabledCats] = useState(() => new Set(Object.keys(DATA.categories)));
-  const [physics, setPhysics] = useState(true);
+  const [query, setQuery] = useState(URL_INIT.q);
+  const [enabledCats, setEnabledCats] = useState(() => {
+    if (URL_INIT.cats && URL_INIT.cats.length) {
+      return new Set(URL_INIT.cats.filter((c) => ALL_CATS.includes(c)));
+    }
+    return new Set(ALL_CATS);
+  });
+  const [physics, setPhysics] = useState(URL_INIT.physics);
   const [spacing, setSpacing] = useState(() => {
+    if (URL_INIT.spacing != null) {
+      return Math.max(0.5, Math.min(2.0, URL_INIT.spacing));
+    }
     const v = parseFloat(localStorage.getItem('vibemap.spacing'));
     return Number.isFinite(v) && v >= 0.5 && v <= 2.5 ? v : 1.0;
   });
+  const [shareCopied, setShareCopied] = useState(false);
   const [introGone, setIntroGone] = useState(false);
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const [entryProgress, setEntryProgress] = useState(0); // 0→1 ripple reveal
@@ -167,6 +202,26 @@ function App() {
 
   // Persist lang
   useEffect(() => { localStorage.setItem('vibemap.lang', lang); }, [lang]);
+
+  // Sync shareable state to the URL via replaceState so the back/forward
+  // history stays clean. Anyone copying the URL gets the same view: language,
+  // focused node, search, category filters, spacing, and physics state.
+  useEffect(() => {
+    const p = new URLSearchParams();
+    if (lang && lang !== 'en') p.set('lang', lang);
+    if (activeId) p.set('node', activeId);
+    if (query) p.set('q', query);
+    if (enabledCats.size !== ALL_CATS.length) {
+      p.set('cats', [...enabledCats].sort().join(','));
+    }
+    if (Math.abs(spacing - 1.0) > 0.005) p.set('s', spacing.toFixed(2));
+    if (!physics) p.set('physics', 'off');
+    const qs = p.toString();
+    const nextUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    if (window.location.search !== (qs ? `?${qs}` : '')) {
+      window.history.replaceState(null, '', nextUrl);
+    }
+  }, [lang, activeId, query, enabledCats, spacing, physics]);
 
   // Spacing slider — scales repulsion + spring rest length together so the
   // graph expands or contracts uniformly. Persisted to localStorage so the
@@ -649,6 +704,35 @@ function App() {
               >{L.toUpperCase()}</button>
             ))}
           </div>
+          <button
+            className={`iconbtn ${shareCopied ? 'on' : ''}`}
+            title={shareCopied ? t.linkCopied : t.share}
+            onClick={async () => {
+              const url = window.location.href;
+              try {
+                await navigator.clipboard.writeText(url);
+                setShareCopied(true);
+                setTimeout(() => setShareCopied(false), 1600);
+              } catch (e) {
+                // clipboard API unavailable (insecure context, etc.) — fall back
+                window.prompt(t.share, url);
+              }
+            }}
+          >
+            {shareCopied ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="4 12 10 18 20 6" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+                <line x1="15.4" y1="6.5" x2="8.6" y2="10.5" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
